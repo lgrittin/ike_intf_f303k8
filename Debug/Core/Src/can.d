@@ -1,5 +1,4 @@
-Drivers/STM32F3xx_HAL_Driver/stm32f3xx_hal_tim_ex.o: \
- ../Drivers/STM32F3xx_HAL_Driver/stm32f3xx_hal_tim_ex.c \
+Core/Src/can.o: ../Core/Src/can.c ../Core/Inc/can.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal.h \
  ../Core/Inc/stm32f3xx_hal_conf.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_rcc.h \
@@ -24,7 +23,11 @@ Drivers/STM32F3xx_HAL_Driver/stm32f3xx_hal_tim_ex.o: \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_pwr.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_pwr_ex.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart.h \
- ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h
+ ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h \
+ ../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.h \
+ ../Core/Inc/main.h ../Core/Inc/usart.h ../Core/Inc/can.h
+
+../Core/Inc/can.h:
 
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal.h:
 
@@ -75,3 +78,11 @@ Drivers/STM32F3xx_HAL_Driver/stm32f3xx_hal_tim_ex.o: \
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart.h:
 
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h:
+
+../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.h:
+
+../Core/Inc/main.h:
+
+../Core/Inc/usart.h:
+
+../Core/Inc/can.h:
