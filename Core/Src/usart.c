@@ -1,0 +1,204 @@
+/**
+  ******************************************************************************
+  * @file    usart.c
+  * @brief   This file provides code for the configuration
+  *          of the USART instances.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2023 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
+
+/* Includes ------------------------------------------------------------------*/
+#include "usart.h"
+
+/* Private typedef -----------------------------------------------------------*/
+
+/* Private define ------------------------------------------------------------*/
+
+/* Private macro -------------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_tx;
+DMA_HandleTypeDef hdma_rx;
+uint8_t aTxStartMessage[] = "Ciao\n\r";
+uint8_t aTxEndMessage[] = "Fine\n\r";
+uint8_t aRxBuffer[RXBUFFERSIZE];
+
+/* Private function prototypes -----------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
+
+/* USART2 init function */
+void MX_USART2_UART_Init(void)
+{
+	huart2.Instance = USART2;
+	huart2.Init.BaudRate = 38400;
+	huart2.Init.WordLength = UART_WORDLENGTH_8B;
+	huart2.Init.StopBits = UART_STOPBITS_1;
+	huart2.Init.Parity = UART_PARITY_NONE;
+	huart2.Init.Mode = UART_MODE_TX_RX;
+	huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+	huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+	huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+	huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+	if (HAL_UART_Init(&huart2) != HAL_OK)
+	{
+	  Error_Handler();
+	}
+}
+
+/**
+  * @brief UART MSP Initialization
+  *        This function configures the hardware resources used:
+  *           - Peripheral's clock enable
+  *           - Peripheral's GPIO Configuration
+  *           - DMA configuration for transmission request by peripheral
+  *           - NVIC configuration for DMA interrupt request enable
+  * @param huart: UART handle pointer
+  * @retval None
+  */
+void HAL_UART_MspInit(UART_HandleTypeDef* huart)
+{
+
+	GPIO_InitTypeDef GPIO_InitStruct = {0};
+
+	/* Enable GPIO clock */
+	USARTx_TX_GPIO_CLK_ENABLE();
+	USARTx_RX_GPIO_CLK_ENABLE();
+
+	/* Enable USARTx clock */
+	USARTx_CLK_ENABLE();
+
+	/* Enable DMA clock */
+	DMAx_CLK_ENABLE();
+
+	/* USART2 GPIO Tx/Rx Configuration */
+	GPIO_InitStruct.Pin = USARTx_TX_PIN|USARTx_RX_PIN;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	GPIO_InitStruct.Alternate = USARTx_TX_AF;
+
+	HAL_GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStruct);
+
+	/* Configure the DMA handler for Transmission process */
+	hdma_tx.Instance                 = USARTx_TX_DMA_CHANNEL;
+	hdma_tx.Init.Direction           = DMA_MEMORY_TO_PERIPH;
+	hdma_tx.Init.PeriphInc           = DMA_PINC_DISABLE;
+	hdma_tx.Init.MemInc              = DMA_MINC_ENABLE;
+	hdma_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+	hdma_tx.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+	hdma_tx.Init.Mode                = DMA_NORMAL;
+	hdma_tx.Init.Priority            = DMA_PRIORITY_LOW;
+
+	HAL_DMA_Init(&hdma_tx);
+
+	/* Associate the initialized DMA handle to the UART handle */
+	__HAL_LINKDMA(huart, hdmatx, hdma_tx);
+
+	/* Configure the DMA handler for reception process */
+	hdma_rx.Instance                 = USARTx_RX_DMA_CHANNEL;
+	hdma_rx.Init.Direction           = DMA_PERIPH_TO_MEMORY;
+	hdma_rx.Init.PeriphInc           = DMA_PINC_DISABLE;
+	hdma_rx.Init.MemInc              = DMA_MINC_ENABLE;
+	hdma_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+	hdma_rx.Init.MemDataAlignment    = DMA_MDATAALIGN_BYTE;
+	hdma_rx.Init.Mode                = DMA_NORMAL;
+	hdma_rx.Init.Priority            = DMA_PRIORITY_HIGH;
+
+	HAL_DMA_Init(&hdma_rx);
+
+	/* Associate the initialized DMA handle to the the UART handle */
+	__HAL_LINKDMA(huart, hdmarx, hdma_rx);
+
+	/* NVIC configuration for DMA transfer complete interrupt (USARTx_TX) */
+	HAL_NVIC_SetPriority(USARTx_DMA_TX_IRQn, 0, 1);
+	HAL_NVIC_EnableIRQ(USARTx_DMA_TX_IRQn);
+
+	/* NVIC configuration for DMA transfer complete interrupt (USARTx_RX) */
+	HAL_NVIC_SetPriority(USARTx_DMA_RX_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(USARTx_DMA_RX_IRQn);
+
+	/* NVIC configuration for USART, to catch the TX complete */
+	HAL_NVIC_SetPriority(USARTx_IRQn, 0, 1);
+	HAL_NVIC_EnableIRQ(USARTx_IRQn);
+
+}
+
+/**
+  * @brief UART MSP De-Initialization
+  *        This function frees the hardware resources used:
+  *          - Disable the Peripheral's clock
+  *          - Revert GPIO, DMA and NVIC configuration to their default state
+  * @param huart: UART handle pointer
+  * @retval None
+  */
+void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
+{
+	/* Peripheral clock disable */
+	USARTx_FORCE_RESET();
+	USARTx_RELEASE_RESET();
+
+	/* Configure UART Tx/Rx as alternate function  */
+	HAL_GPIO_DeInit(USARTx_TX_GPIO_PORT, USARTx_TX_PIN);
+	HAL_GPIO_DeInit(USARTx_RX_GPIO_PORT, USARTx_RX_PIN);
+
+	/* De-Initialize the DMA Channel associated to Tx/Rx process */
+	HAL_DMA_DeInit(&hdma_tx);
+	HAL_DMA_DeInit(&hdma_rx);
+
+	/* Disable the NVIC for DMA */
+	HAL_NVIC_DisableIRQ(USARTx_DMA_TX_IRQn);
+	HAL_NVIC_DisableIRQ(USARTx_DMA_RX_IRQn);
+}
+
+/**
+  * @brief  Tx Transfer completed callback
+  * @param  huart: UART handle.
+  * @note   This example shows a simple way to report end of DMA Tx transfer, and
+  *         you can add your own implementation.
+  * @retval None
+  */
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	/* Toogle LED3 : Transfer in transmission process is correct */
+	//BSP_LED_On(LED3);
+}
+
+/**
+  * @brief  Rx Transfer completed callback
+  * @param  huart: UART handle
+  * @note   This example shows a simple way to report end of DMA Rx transfer, and
+  *         you can add your own implementation.
+  * @retval None
+  */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	/* Turn LED3 on: Transfer in reception process is correct */
+	BSP_LED_On(LED3);
+}
+
+/**
+  * @brief  UART error callbacks
+  * @param  huart: UART handle
+  * @note   This example shows a simple way to report transfer error, and you can
+  *         add your own implementation.
+  * @retval None
+  */
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	/* Turn LED3 off: Transfer error in reception/transmission process */
+	BSP_LED_Off(LED3);
+}
+
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
