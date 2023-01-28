@@ -61,12 +61,15 @@
 #define USARTx_IRQn                      USART2_IRQn
 #define USARTx_IRQHandler                USART2_IRQHandler
 
-/* Size of Transmission buffer */
-#define TXSTARTMESSAGESIZE               (COUNTOF(aTxStartMessage) - 1)
-#define TXENDMESSAGESIZE                 (COUNTOF(aTxEndMessage) - 1)
-
-/* Size of Reception buffer */
-#define RXBUFFERSIZE                     10
+/* Address and Data Length */
+#define ADDRESS_LENGTH                	2
+#define CAN_DATA_LENGTH               	4
+#define USART_MSG_COUNTER			  	2
+#define USART_TRUNCATION              	2
+#define USART_MSG_LENGTH              	ADDRESS_LENGTH + \
+									  	CAN_DATA_LENGTH + \
+										USART_MSG_COUNTER + \
+										USART_TRUNCATION
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -84,9 +87,9 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart);
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_tx;
 extern DMA_HandleTypeDef hdma_rx;
-extern uint8_t aTxStartMessage[8];
-extern uint8_t aTxEndMessage[8];
-extern uint8_t aRxBuffer[RXBUFFERSIZE];
+extern uint8_t usart_tx[USART_MSG_LENGTH];
+extern uint8_t usart_rx[USART_MSG_LENGTH];
+extern uint16_t usart_tx_msg_cnt;
 
 #endif /* __USART_H__ */
 

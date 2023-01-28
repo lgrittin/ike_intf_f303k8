@@ -29,11 +29,11 @@
 
 uint8_t ubKeyNumber = 0x0;
 CAN_HandleTypeDef hcan;
-CAN_TxHeaderTypeDef TxHeader;
-CAN_RxHeaderTypeDef RxHeader;
-uint8_t TxData[8];
-uint8_t RxData[8];
-uint32_t TxMailbox;
+CAN_TxHeaderTypeDef can_tx_header;
+CAN_RxHeaderTypeDef can_rx_header;
+uint8_t can_tx[CAN_DATA_LENGTH];
+uint8_t can_rx[CAN_DATA_LENGTH];
+uint32_t can_tx_mailbox;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -53,11 +53,10 @@ void MX_CAN1_Init(void)
     hcan.Init.ReceiveFifoLocked = DISABLE;
     hcan.Init.TransmitFifoPriority = DISABLE;
     hcan.Init.Mode = CAN_MODE_NORMAL;
-    hcan.Init.SyncJumpWidth = CAN_SJW_1TQ;
-    hcan.Init.TimeSeg1 = CAN_BS1_9TQ;
-    hcan.Init.TimeSeg2 = CAN_BS2_8TQ;
-    hcan.Init.Prescaler = 2;
-
+    hcan.Init.SyncJumpWidth = CAN_SJW_3TQ;
+    hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
+    hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
+    hcan.Init.Prescaler = 4;
     if (HAL_CAN_Init(&hcan) != HAL_OK)
     {
         Error_Handler();
@@ -74,7 +73,6 @@ void MX_CAN1_Init(void)
     sFilterConfig.FilterFIFOAssignment = CAN_RX_FIFO0;
     sFilterConfig.FilterActivation = ENABLE;
     sFilterConfig.SlaveStartFilterBank = 14;
-
     if (HAL_CAN_ConfigFilter(&hcan, &sFilterConfig) != HAL_OK)
     {
         Error_Handler();
@@ -91,14 +89,6 @@ void MX_CAN1_Init(void)
     {
         Error_Handler();
     }
-
-    /* Configure Transmission process */
-    TxHeader.StdId = 0x321;
-    TxHeader.ExtId = 0x01;
-    TxHeader.RTR = CAN_RTR_DATA;
-    TxHeader.IDE = CAN_ID_STD;
-    TxHeader.DLC = 2;
-    TxHeader.TransmitGlobalTime = DISABLE;
 }
 
 /**
@@ -172,15 +162,29 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef *hcan)
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	/* Get RX message */
-	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &RxHeader, RxData) != HAL_OK)
+	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_rx_header, can_rx) != HAL_OK)
+		Error_Handler();
+
+	if (can_rx_header.DLC == CAN_DATA_LENGTH)
 	{
-	  /* Reception Error */
-	  Error_Handler();
+		usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
+		usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
+		usart_tx[2] = can_rx[0];
+		usart_tx[3] = can_rx[1];
+		usart_tx[4] = can_rx[2];
+		usart_tx[5] = can_rx[3];
+		usart_tx[6] = (uint8_t)((usart_tx_msg_cnt & 0xFF00) >> 8);
+		usart_tx[7] = (uint8_t)(usart_tx_msg_cnt & 0x00FF);
+		usart_tx[8] = '\r';
+		usart_tx[9] = '\n';
+		if(HAL_UART_Transmit_DMA(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
+			Error_Handler();
 	}
 
 	/* Display LEDx */
-	if ((RxHeader.StdId == 0x321) && (RxHeader.IDE == CAN_ID_STD) && (RxHeader.DLC == 2))
+	if (can_rx_header.StdId == ID_PDO_00)
 	{
+		BSP_LED_Toggle(LED3);
 	}
 }
 

@@ -33,6 +33,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 
+uint32_t cnt = 0;
+
 /* Private function prototypes -----------------------------------------------*/
 
 void SystemClock_Config(void);
@@ -63,13 +65,16 @@ int main(void)
 	/* Init UART + DMA for PC communication */
 	MX_USART2_UART_Init();
 
+	/* Init CAN for G170 communication */
+	MX_CAN1_Init();
+
+	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
+		Error_Handler();
+
 	/* Infinite loop */
 	while (1)
 	{
-		HAL_Delay(100);
-		if(HAL_UART_Transmit_DMA(&huart2, (uint8_t*)aTxStartMessage, TXSTARTMESSAGESIZE)!= HAL_OK)
-			Error_Handler();
-		BSP_LED_Toggle(LED3);
+		//HAL_Delay(500);
 	}
 }
 
@@ -129,8 +134,8 @@ void Error_Handler(void)
 {
 	while(1)
 	{
-		HAL_Delay(1000);
-		BSP_LED_Toggle(LED3);
+    //HAL_Delay(1000);
+		//BSP_LED_Toggle(LED3);
 	}
 }
 

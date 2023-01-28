@@ -32,6 +32,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 extern UART_HandleTypeDef huart2;
+extern CAN_HandleTypeDef hcan;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -182,12 +183,13 @@ void USARTx_IRQHandler(void)
 }
 
 /**
-  * @brief  This function handles PPP interrupt request.
+  * @brief  This function handles CAN1 RX0 interrupt request.
   * @param  None
   * @retval None
   */
-/*void PPP_IRQHandler(void)
+void CANx_RX_IRQHandler(void)
 {
-}*/
+  HAL_CAN_IRQHandler(&hcan);
+}
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

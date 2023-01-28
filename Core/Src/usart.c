@@ -30,9 +30,10 @@
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_tx;
 DMA_HandleTypeDef hdma_rx;
-uint8_t aTxStartMessage[] = "Ciao\n\r";
-uint8_t aTxEndMessage[] = "Fine\n\r";
-uint8_t aRxBuffer[RXBUFFERSIZE];
+uint8_t usart_tx[USART_MSG_LENGTH];
+uint8_t usart_rx[USART_MSG_LENGTH];
+uint16_t usart_tx_msg_cnt = 0;
+uint16_t usart_rx_msg_cnt = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -42,7 +43,7 @@ uint8_t aRxBuffer[RXBUFFERSIZE];
 void MX_USART2_UART_Init(void)
 {
 	huart2.Instance = USART2;
-	huart2.Init.BaudRate = 38400;
+	huart2.Init.BaudRate = 115200;
 	huart2.Init.WordLength = UART_WORDLENGTH_8B;
 	huart2.Init.StopBits = UART_STOPBITS_1;
 	huart2.Init.Parity = UART_PARITY_NONE;
@@ -171,8 +172,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
-	/* Toogle LED3 : Transfer in transmission process is correct */
-	//BSP_LED_On(LED3);
+	usart_tx_msg_cnt++;
 }
 
 /**
@@ -184,8 +184,40 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	/* Turn LED3 on: Transfer in reception process is correct */
-	BSP_LED_On(LED3);
+	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
+		Error_Handler();
+	usart_rx_msg_cnt++;
+
+    /* Configure Transmission process */
+	if ((usart_rx[8] == 0x0D) && (usart_rx[9] == 0x0A))
+	{
+		can_tx_header.StdId = (uint32_t)((uint16_t)(usart_rx[1] & 0x00FF) +
+				(uint16_t)((usart_rx[0] << 8) & 0xFF00));
+	    //can_tx_header.ExtId = 0x01;
+		can_tx_header.RTR = CAN_RTR_DATA;
+		can_tx_header.IDE = CAN_ID_STD;
+		can_tx_header.DLC = CAN_DATA_LENGTH;
+		can_tx_header.TransmitGlobalTime = DISABLE;
+		can_tx[0] = usart_rx[2];
+		can_tx[1] = usart_rx[3];
+		can_tx[2] = usart_rx[4];
+		can_tx[3] = usart_rx[5];
+	    if (HAL_CAN_AddTxMessage(&hcan, &can_tx_header, can_tx, &can_tx_mailbox) != HAL_OK)
+	    	Error_Handler();
+	}
+	else
+	{
+		usart_rx[0] = 0;
+		usart_rx[1] = 0;
+		usart_rx[2] = 0;
+		usart_rx[3] = 0;
+		usart_rx[4] = 0;
+		usart_rx[5] = 0;
+		usart_rx[6] = 0;
+		usart_rx[7] = 0;
+		usart_rx[8] = 0;
+		usart_rx[9] = 0;
+	}
 }
 
 /**
@@ -197,8 +229,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
-	/* Turn LED3 off: Transfer error in reception/transmission process */
-	BSP_LED_Off(LED3);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
