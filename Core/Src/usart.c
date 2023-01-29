@@ -184,7 +184,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
+	if (HAL_UART_Receive_DMA(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
 		Error_Handler();
 	usart_rx_msg_cnt++;
 

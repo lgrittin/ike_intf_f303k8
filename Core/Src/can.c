@@ -34,6 +34,9 @@ CAN_RxHeaderTypeDef can_rx_header;
 uint8_t can_tx[CAN_DATA_LENGTH];
 uint8_t can_rx[CAN_DATA_LENGTH];
 uint32_t can_tx_mailbox;
+uint32_t can_pdo_rx_cnt = 0;
+uint32_t can_sdo_rx_cnt = 0;
+uint32_t can_inv_rx_cnt = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -161,6 +164,10 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef *hcan)
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+	uint8_t en_send_usart = 0;
+	uint16_t en_artifact = 0;
+	uint8_t i = 0;
+
 	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_rx_header, can_rx) != HAL_OK)
 		Error_Handler();
@@ -169,16 +176,44 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	{
 		usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
 		usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
+
+		switch (usart_tx[0])
+		{
+		case 0x01:
+			can_pdo_rx_cnt++;
+			en_send_usart = 1;
+			break;
+		case 0x02:
+			can_sdo_rx_cnt++;
+			break;
+		default:
+			can_inv_rx_cnt++;
+			break;
+		}
 		usart_tx[2] = can_rx[0];
 		usart_tx[3] = can_rx[1];
 		usart_tx[4] = can_rx[2];
 		usart_tx[5] = can_rx[3];
 		usart_tx[6] = (uint8_t)((usart_tx_msg_cnt & 0xFF00) >> 8);
 		usart_tx[7] = (uint8_t)(usart_tx_msg_cnt & 0x00FF);
-		usart_tx[8] = '\r';
+
+		for (i=0; i<7; i++)
+		{
+			if (usart_tx[i] == '\n')
+			{
+				usart_tx[i] = 0x1A;
+				en_artifact |= (0x01 << (7-i));
+			}
+		}
+		usart_tx[8] = (uint8_t)en_artifact;	//'\r';
 		usart_tx[9] = '\n';
-		if(HAL_UART_Transmit_DMA(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
-			Error_Handler();
+
+		if (en_send_usart)
+		{
+			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
+				Error_Handler();
+			en_send_usart = 0;
+		}
 	}
 
 	/* Display LEDx */
