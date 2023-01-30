@@ -30,10 +30,12 @@
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_tx;
 DMA_HandleTypeDef hdma_rx;
-uint8_t usart_tx[USART_MSG_LENGTH];
-uint8_t usart_rx[USART_MSG_LENGTH];
-uint16_t usart_tx_msg_cnt = 0;
-uint16_t usart_rx_msg_cnt = 0;
+uint8_t usart_tx[2*USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t usart_rx[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint32_t usart_tx_msg_cnt = 0;
+uint32_t usart_rx_msg_cnt = 0;
+uint8_t usart_rx_chksum_err = 0;
+uint8_t en_send_can = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -184,24 +186,74 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
   */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (HAL_UART_Receive_DMA(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
+    uint8_t computed_chksm = 0x00;
+    uint8_t data_chksm = 0x00;
+    uint8_t artifact = 0x00;
+    uint8_t data_dec[7] = { 0, 0, 0, 0, 0, 0, 0 };
+
+	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
 		Error_Handler();
 	usart_rx_msg_cnt++;
 
-    /* Configure Transmission process */
-	if ((usart_rx[8] == 0x0D) && (usart_rx[9] == 0x0A))
+	/**
+	 * USART Msg Structure:
+	 *
+	 * idx:	[0]   [1]   [2]     [3]     [4]     [5]     [6]   [7]        [8]	 [9]
+	 *  	---------------------------------------------------------------------------
+	 *  	| ID1 | ID0 | DATA3 | DATA2 | DATA1 | DATA0 | STS | ARTIFACT | CHKSM | LF |
+	 *  	---------------------------------------------------------------------------
+	 */
+	if ((huart->RxXferSize == 10) && (usart_rx[9] == 0x0A))
 	{
-		can_tx_header.StdId = (uint32_t)((uint16_t)(usart_rx[1] & 0x00FF) +
-				(uint16_t)((usart_rx[0] << 8) & 0xFF00));
+		computed_chksm = 0xA5 ^ \
+				usart_rx[0] ^ \
+				usart_rx[1] ^ \
+				usart_rx[2] ^ \
+				usart_rx[3] ^ \
+				usart_rx[4] ^ \
+				usart_rx[5] ^ \
+				usart_rx[6] ^ \
+				usart_rx[7];
+		data_chksm = ((usart_rx[8] == 0x1A) ? (0x0A) : (usart_rx[8]));
+		if (computed_chksm == data_chksm)
+		{
+			en_send_can = 1;
+			artifact = ((usart_rx[7] == 0x01) ? (0x0A) : (usart_rx[7]));
+			data_dec[0] = ((((artifact & 0x80) >> 7) * 0x0A) + (usart_rx[0] * (1 - ((artifact & 0x80) >> 7))));
+			data_dec[1] = ((((artifact & 0x40) >> 6) * 0x0A) + (usart_rx[1] * (1 - ((artifact & 0x40) >> 6))));
+			data_dec[2] = ((((artifact & 0x20) >> 5) * 0x0A) + (usart_rx[2] * (1 - ((artifact & 0x20) >> 5))));
+			data_dec[3] = ((((artifact & 0x10) >> 4) * 0x0A) + (usart_rx[3] * (1 - ((artifact & 0x10) >> 4))));
+			data_dec[4] = ((((artifact & 0x08) >> 3) * 0x0A) + (usart_rx[4] * (1 - ((artifact & 0x08) >> 3))));
+			data_dec[5] = ((((artifact & 0x04) >> 2) * 0x0A) + (usart_rx[5] * (1 - ((artifact & 0x04) >> 2))));
+			data_dec[6] = ((((artifact & 0x02) >> 1) * 0x0A) + (usart_rx[6] * (1 - ((artifact & 0x02) >> 1))));
+		}
+		else
+		{
+			usart_rx_chksum_err++;
+			en_send_can = 0;
+		}
+	}
+	else
+	{
+		usart_rx_chksum_err++;
+		en_send_can = 0;
+	}
+
+
+    /* Configure Transmission process */
+	if (en_send_can)
+	{
+		can_tx_header.StdId = (uint32_t)((uint16_t)(data_dec[1] & 0x00FF) +
+				(uint16_t)((data_dec[0] << 8) & 0xFF00));
 	    //can_tx_header.ExtId = 0x01;
 		can_tx_header.RTR = CAN_RTR_DATA;
 		can_tx_header.IDE = CAN_ID_STD;
 		can_tx_header.DLC = CAN_DATA_LENGTH;
 		can_tx_header.TransmitGlobalTime = DISABLE;
-		can_tx[0] = usart_rx[2];
-		can_tx[1] = usart_rx[3];
-		can_tx[2] = usart_rx[4];
-		can_tx[3] = usart_rx[5];
+		can_tx[0] = data_dec[2];
+		can_tx[1] = data_dec[3];
+		can_tx[2] = data_dec[4];
+		can_tx[3] = data_dec[5];
 	    if (HAL_CAN_AddTxMessage(&hcan, &can_tx_header, can_tx, &can_tx_mailbox) != HAL_OK)
 	    	Error_Handler();
 	}

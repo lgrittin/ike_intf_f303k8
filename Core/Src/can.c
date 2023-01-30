@@ -18,6 +18,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "can.h"
+#include <string.h>
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -37,6 +38,8 @@ uint32_t can_tx_mailbox;
 uint32_t can_pdo_rx_cnt = 0;
 uint32_t can_sdo_rx_cnt = 0;
 uint32_t can_inv_rx_cnt = 0;
+static uint8_t usart_sdo_pending = 0;
+static uint8_t usart_tx_sdo_pending[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -164,62 +167,141 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef *hcan)
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-	uint8_t en_send_usart = 0;
 	uint16_t en_artifact = 0;
-	uint8_t i = 0;
+	uint16_t i = 0;
+	uint8_t send_usart_code = 0;
 
 	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_rx_header, can_rx) != HAL_OK)
 		Error_Handler();
 
+	/**
+	 * USART Msg Structure:
+	 *
+	 * idx:	[0]   [1]   [2]     [3]     [4]     [5]     [6]   [7]        [8]	 [9]
+	 *  	---------------------------------------------------------------------------
+	 *  	| ID1 | ID0 | DATA3 | DATA2 | DATA1 | DATA0 | STS | ARTIFACT | CHKSM | LF |
+	 *  	---------------------------------------------------------------------------
+	 */
 	if (can_rx_header.DLC == CAN_DATA_LENGTH)
 	{
-		usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
-		usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
-
-		switch (usart_tx[0])
+		/* Check ID of received can packet and take properly action */
+		switch (can_rx_header.StdId & 0x0000FF00)
 		{
-		case 0x01:
+		/* send 1 packet through usart (PDO), no SDO pending */
+		case (uint32_t)(ID_PDO_00):
 			can_pdo_rx_cnt++;
-			en_send_usart = 1;
+			send_usart_code = 1;
 			break;
-		case 0x02:
-			can_sdo_rx_cnt++;
+		/* store 1 packet, assign SDO pending if pending is void */
+		case (uint32_t)(ID_SDO_00):
+			if (!usart_sdo_pending)
+			{
+				can_sdo_rx_cnt++;
+				send_usart_code = 2;
+				usart_sdo_pending = 1;
+			}
 			break;
+		/* don't send through usart */
 		default:
 			can_inv_rx_cnt++;
+			send_usart_code = 0;
 			break;
 		}
-		usart_tx[2] = can_rx[0];
-		usart_tx[3] = can_rx[1];
-		usart_tx[4] = can_rx[2];
-		usart_tx[5] = can_rx[3];
-		usart_tx[6] = (uint8_t)((usart_tx_msg_cnt & 0xFF00) >> 8);
-		usart_tx[7] = (uint8_t)(usart_tx_msg_cnt & 0x00FF);
 
-		for (i=0; i<7; i++)
+		switch (send_usart_code)
 		{
-			if (usart_tx[i] == '\n')
+		/* Fill usart_tx with PDO */
+		case 1:
+			usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
+			usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
+			usart_tx[2] = can_rx[0];
+			usart_tx[3] = can_rx[1];
+			usart_tx[4] = can_rx[2];
+			usart_tx[5] = can_rx[3];
+			usart_tx[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
+			for (i=0; i<7; i++)
 			{
-				usart_tx[i] = 0x1A;
-				en_artifact |= (0x01 << (7-i));
+				if (usart_tx[i] == '\n')
+				{
+					usart_tx[i] = 0x1A;
+					en_artifact |= (uint8_t)(0x0001 << (7-i));
+				}
 			}
+			if (en_artifact == '\n')
+				en_artifact = 0x01;
+			usart_tx[7] = (uint8_t)en_artifact;
+			usart_tx[8] = 0xA5 ^ \
+					usart_tx[0] ^ \
+					usart_tx[1] ^ \
+					usart_tx[2] ^ \
+					usart_tx[3] ^ \
+					usart_tx[4] ^ \
+					usart_tx[5] ^ \
+					usart_tx[6] ^ \
+					usart_tx[7];
+			if (usart_tx[8] == '\n')
+				usart_tx[8] = 0x1A;
+			usart_tx[9] = '\n';
+			break;
+		/* Fill usart_tx_additional with SDO */
+		case 2:
+			usart_tx_sdo_pending[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
+			usart_tx_sdo_pending[1] = (can_rx_header.StdId & 0x000000FF);
+			usart_tx_sdo_pending[2] = can_rx[0];
+			usart_tx_sdo_pending[3] = can_rx[1];
+			usart_tx_sdo_pending[4] = can_rx[2];
+			usart_tx_sdo_pending[5] = can_rx[3];
+			usart_tx_sdo_pending[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
+			for (i=0; i<7; i++)
+			{
+				if (usart_tx_sdo_pending[i] == '\n')
+				{
+					usart_tx_sdo_pending[i] = 0x1A;
+					en_artifact |= (uint8_t)(0x0001 << (7-i));
+				}
+			}
+			if (en_artifact == '\n')
+				en_artifact = 0x01;
+			usart_tx_sdo_pending[7] = (uint8_t)en_artifact;
+			usart_tx_sdo_pending[8] = 0xA5 ^ \
+					usart_tx_sdo_pending[0] ^ \
+					usart_tx_sdo_pending[1] ^ \
+					usart_tx_sdo_pending[2] ^ \
+					usart_tx_sdo_pending[3] ^ \
+					usart_tx_sdo_pending[4] ^ \
+					usart_tx_sdo_pending[5] ^ \
+					usart_tx_sdo_pending[6] ^ \
+					usart_tx_sdo_pending[7];
+			if (usart_tx_sdo_pending[8] == '\n')
+				usart_tx_sdo_pending[8] = 0x1A;
+			usart_tx_sdo_pending[9] = '\n';
+			break;
+		default:
+			break;
 		}
-		usart_tx[8] = (uint8_t)en_artifact;	//'\r';
-		usart_tx[9] = '\n';
 
-		if (en_send_usart)
+		/* Transmit only if PDO arrived  */
+		if (send_usart_code == 1)
 		{
-			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
-				Error_Handler();
-			en_send_usart = 0;
+			/* Push stored SDO in the packet */
+			if (usart_sdo_pending)
+			{
+				memcpy(&(usart_tx[USART_MSG_LENGTH]), &(usart_tx_sdo_pending[0]), USART_MSG_LENGTH);
+				if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, 2*USART_MSG_LENGTH)!= HAL_OK)
+					Error_Handler();
+				usart_sdo_pending = 0;
+			}
+			/* no SDO stored */
+			else
+			{
+				if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
+					Error_Handler();
+			}
+			/* Display LED*/
+			if ((uint16_t)(can_rx_header.StdId & 0x0000FFFF) == ID_PDO_00)
+				BSP_LED_Toggle(LED3);
 		}
-	}
-
-	/* Display LEDx */
-	if (can_rx_header.StdId == ID_PDO_00)
-	{
-		BSP_LED_Toggle(LED3);
 	}
 }
 

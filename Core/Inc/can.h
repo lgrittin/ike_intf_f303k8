@@ -50,15 +50,26 @@
 #define CANx_RX_IRQn                   USB_LP_CAN_RX0_IRQn
 #define CANx_RX_IRQHandler             USB_LP_CAN_RX0_IRQHandler
 
-/* Address and Data Length */
-#define ADDRESS_LENGTH                2
+/**
+ * USART Msg Structure:
+ *
+ * idx:	[0]   [1]   [2]     [3]     [4]     [5]     [6]   [7]        [8]	 [9]
+ *  	---------------------------------------------------------------------------
+ *  	| ID1 | ID0 | DATA3 | DATA2 | DATA1 | DATA0 | STS | ARTIFACT | CHKSM | LF |
+ *  	---------------------------------------------------------------------------
+ */
+#define CAN_ADDRESS_LENGTH            2
 #define CAN_DATA_LENGTH               4
-#define USART_MSG_COUNTER			  2
-#define USART_TRUNCATION              2
-#define USART_MSG_LENGTH              ADDRESS_LENGTH + \
+#define USART_ARTIFACT				  1
+#define USART_STS					  1
+#define USART_CHECKSUM				  1
+#define USART_LF		              1
+#define USART_MSG_LENGTH              10/*CAN_ADDRESS_LENGTH + \
 									  CAN_DATA_LENGTH + \
-									  USART_MSG_COUNTER + \
-									  USART_TRUNCATION
+									  USART_ARTIFACT + \
+									  USART_STS + \
+									  USART_CHECKSUM + \
+									  USART_LF*/
 
 /* Can Objects G170 */
 #define PDO_TX_G170_OBJ_ID            1
@@ -72,6 +83,7 @@
 
 /* Masks */
 #define ID_PDO_00                     0x0100
+#define ID_SDO_00                     0x0200
 #define PDO_MASK_FILT                 ID_PDO_00
 #define SDO_RX_SYS_MASK_FILT          ID_SDO_00
 #define SDO_BIT_AGGIUNTO              0x0400
@@ -85,6 +97,7 @@ extern CAN_RxHeaderTypeDef can_rx_header;
 extern uint8_t can_tx[CAN_DATA_LENGTH];
 extern uint8_t can_rx[CAN_DATA_LENGTH];
 extern uint32_t can_tx_mailbox;
+extern uint8_t usart_rx_chksum_err;
 
 /* Exported macro ------------------------------------------------------------*/
 
