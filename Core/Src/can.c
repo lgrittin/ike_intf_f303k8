@@ -38,8 +38,6 @@ uint32_t can_tx_mailbox;
 uint32_t can_pdo_rx_cnt = 0;
 uint32_t can_sdo_rx_cnt = 0;
 uint32_t can_inv_rx_cnt = 0;
-static uint8_t usart_sdo_pending = 0;
-static uint8_t usart_tx_sdo_pending[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -169,7 +167,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
 	uint16_t en_artifact = 0;
 	uint16_t i = 0;
+	uint16_t idx = 0;
 	uint8_t send_usart_code = 0;
+	uint8_t usart_tx_sdo_pending[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_rx_header, can_rx) != HAL_OK)
@@ -188,24 +188,23 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		/* Check ID of received can packet and take properly action */
 		switch (can_rx_header.StdId & 0x0000FF00)
 		{
-		/* send 1 packet through usart (PDO), no SDO pending */
+		/* Store PDO */
 		case (uint32_t)(ID_PDO_00):
 			can_pdo_rx_cnt++;
-			send_usart_code = 1;
+			idx = (uint16_t)can_rx_header.StdId - ID_PDO_00;
+			memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
 			break;
-		/* store 1 packet, assign SDO pending if pending is void */
-		/*case (uint32_t)(ID_SDO_00):
-			if (!usart_sdo_pending)
-			{
-				can_sdo_rx_cnt++;
-				send_usart_code = 2;
-				usart_sdo_pending = 1;
-			}
-			break;*/
-		/* don't send through usart */
+		/* Store PDO */
+		case (uint32_t)(ID_SDO_00):
+			can_sdo_rx_cnt++;
+			idx = (uint16_t)can_rx_header.StdId - ID_SDO_00;
+			memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
+			if (promise_sdo == (uint16_t)can_rx_header.StdId)
+				memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
+			break;
+		/* Ignore */
 		default:
 			can_inv_rx_cnt++;
-			send_usart_code = 0;
 			break;
 		}
 

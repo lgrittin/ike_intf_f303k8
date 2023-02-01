@@ -246,7 +246,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
 		can_tx_header.StdId = (uint32_t)((uint16_t)(data_dec[1] & 0x00FF) +
 				(uint16_t)((data_dec[0] << 8) & 0xFF00));
-		promise_sdo = (uint16_t)can_tx_header.StdId;
 	    //can_tx_header.ExtId = 0x01;
 		can_tx_header.RTR = CAN_RTR_DATA;
 		can_tx_header.IDE = CAN_ID_STD;
@@ -258,6 +257,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		can_tx[3] = data_dec[5];
 	    if (HAL_CAN_AddTxMessage(&hcan, &can_tx_header, can_tx, &can_tx_mailbox) != HAL_OK)
 	    	Error_Handler();
+	    promise_sdo = (uint16_t)can_tx_header.StdId;
 	}
 	else
 	{
