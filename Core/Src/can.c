@@ -194,14 +194,14 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			send_usart_code = 1;
 			break;
 		/* store 1 packet, assign SDO pending if pending is void */
-		case (uint32_t)(ID_SDO_00):
+		/*case (uint32_t)(ID_SDO_00):
 			if (!usart_sdo_pending)
 			{
 				can_sdo_rx_cnt++;
 				send_usart_code = 2;
 				usart_sdo_pending = 1;
 			}
-			break;
+			break;*/
 		/* don't send through usart */
 		default:
 			can_inv_rx_cnt++;

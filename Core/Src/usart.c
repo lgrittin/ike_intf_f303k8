@@ -36,6 +36,7 @@ uint32_t usart_tx_msg_cnt = 0;
 uint32_t usart_rx_msg_cnt = 0;
 uint8_t usart_rx_chksum_err = 0;
 uint8_t en_send_can = 0;
+static uint16_t promise_sdo = 0x0000;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -245,6 +246,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	{
 		can_tx_header.StdId = (uint32_t)((uint16_t)(data_dec[1] & 0x00FF) +
 				(uint16_t)((data_dec[0] << 8) & 0xFF00));
+		promise_sdo = (uint16_t)can_tx_header.StdId;
 	    //can_tx_header.ExtId = 0x01;
 		can_tx_header.RTR = CAN_RTR_DATA;
 		can_tx_header.IDE = CAN_ID_STD;
