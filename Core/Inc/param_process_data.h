@@ -103,7 +103,7 @@ typedef enum {
  * PROCESS DATA OBJECT (PDO)
  * ========================================================= */
 
-#define PDO_LENGTH 13
+#define PDO_LENGTH 14
 
 #define ID_PDO_00 0x0100
 #define ID_PDO_01 0x0101
@@ -118,6 +118,7 @@ typedef enum {
 #define ID_PDO_10 0x010A
 #define ID_PDO_11 0x010B
 #define ID_PDO_12 0x010C
+#define ID_PDO_13 0x010D
 
 #define ID_PDO_00_BYTE 2
 #define ID_PDO_01_BYTE 2
@@ -132,6 +133,7 @@ typedef enum {
 #define ID_PDO_10_BYTE 4
 #define ID_PDO_11_BYTE 4
 #define ID_PDO_12_BYTE 2
+#define ID_PDO_13_BYTE 4
 
 typedef enum {
     CTRL_OUTPUT = 0,

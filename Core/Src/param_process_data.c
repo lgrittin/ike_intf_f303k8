@@ -103,9 +103,15 @@ struct DATA process_data[] =
 
     //scr_synch_invalid_cnt
     ID_PDO_12,
-    DGN_OUTPUT,
+    SCR_OUTPUT,
     ID_PDO_12_BYTE,
-    &scr_synch_invalid_cnt
+    &scr_synch_invalid_cnt,
+
+    //scr_synch_freq
+    ID_PDO_13,
+    SCR_OUTPUT,
+    ID_PDO_13_BYTE,
+    &scr_synch_freq
 };
 
 struct DATA param_data[] =
