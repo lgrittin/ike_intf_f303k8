@@ -196,6 +196,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		Error_Handler();
 	usart_rx_msg_cnt++;
 
+	// modifica a casaccio
+
 	/**
 	 * USART Msg Structure:
 	 *
