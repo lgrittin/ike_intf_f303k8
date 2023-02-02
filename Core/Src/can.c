@@ -171,6 +171,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	uint8_t send_usart_code = 0;
 	uint8_t usart_tx_sdo_pending[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+
+	// sta roba andra cambiata.
+
 	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_rx_header, can_rx) != HAL_OK)
 		Error_Handler();
