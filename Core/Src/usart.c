@@ -17,7 +17,11 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include "can.h"
 #include "usart.h"
+#include "main.h"
+#include "globals.h"
+#include "param_process_data.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -36,7 +40,7 @@ uint32_t usart_tx_msg_cnt = 0;
 uint32_t usart_rx_msg_cnt = 0;
 uint8_t usart_rx_chksum_err = 0;
 uint8_t en_send_can = 0;
-static uint16_t promise_sdo = 0x0000;
+uint16_t promise_sdo = 0x0000;
 
 /* Private function prototypes -----------------------------------------------*/
 

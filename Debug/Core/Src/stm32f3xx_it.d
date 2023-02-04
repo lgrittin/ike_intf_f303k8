@@ -25,7 +25,7 @@ Core/Src/stm32f3xx_it.o: ../Core/Src/stm32f3xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h \
  ../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.h \
- ../Core/Inc/usart.h ../Core/Inc/main.h ../Core/Inc/can.h \
+ ../Core/Inc/param_process_data.h ../Core/Inc/can.h ../Core/Inc/usart.h \
  ../Core/Inc/stm32f3xx_it.h
 
 ../Core/Inc/main.h:
@@ -82,10 +82,10 @@ Core/Src/stm32f3xx_it.o: ../Core/Src/stm32f3xx_it.c ../Core/Inc/main.h \
 
 ../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.h:
 
-../Core/Inc/usart.h:
-
-../Core/Inc/main.h:
+../Core/Inc/param_process_data.h:
 
 ../Core/Inc/can.h:
+
+../Core/Inc/usart.h:
 
 ../Core/Inc/stm32f3xx_it.h:

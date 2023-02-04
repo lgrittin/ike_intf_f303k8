@@ -24,8 +24,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f3xx_hal.h"
 #include "stm32f3xx_nucleo_32.h"
-#include "usart.h"
+#include "param_process_data.h"
 #include "can.h"
+#include "usart.h"
 
 /* Exported types ------------------------------------------------------------*/
 

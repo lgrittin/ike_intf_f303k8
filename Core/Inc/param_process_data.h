@@ -37,6 +37,27 @@ struct DATA {
     //void *lim_min;
 };
 
+/**
+ * USART Msg Structure:
+ *
+ * idx:	[0]   [1]   [2]     [3]     [4]     [5]     [6]   [7]        [8]	 [9]
+ *  	---------------------------------------------------------------------------
+ *  	| ID1 | ID0 | DATA3 | DATA2 | DATA1 | DATA0 | STS | ARTIFACT | CHKSM | LF |
+ *  	---------------------------------------------------------------------------
+ */
+#define CAN_ADDRESS_LENGTH             	2
+#define CAN_DATA_LENGTH               	4
+#define USART_ARTIFACT					1
+#define USART_STS						1
+#define USART_CHECKSUM					1
+#define USART_LF		              	1
+#define USART_MSG_LENGTH              	10/*CAN_ADDRESS_LENGTH + \
+									  	CAN_DATA_LENGTH + \
+										USART_ARTIFACT + \
+										USART_STS + \
+										USART_CHECKSUM + \
+										USART_LF*/
+
 /* ========================================================= *
  * SERVICE DEVICE OBJECT (SDO)
  * ========================================================= */

@@ -22,8 +22,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "param_process_data.h"
+#include "can.h"
+#include "usart.h"
 #include "globals.h"
+#include "param_process_data.h"
 
 /* Private typedef -----------------------------------------------------------*/
 

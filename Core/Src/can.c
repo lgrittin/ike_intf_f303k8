@@ -17,7 +17,13 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+
+#define __MAIN__
 #include "can.h"
+#include "usart.h"
+#include "main.h"
+#include "globals.h"
+#include "param_process_data.h"
 #include <string.h>
 
 /* Private typedef -----------------------------------------------------------*/
@@ -171,10 +177,6 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 	uint8_t send_usart_code = 0;
 	uint8_t usart_tx_sdo_pending[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-
-	// sta roba andra cambiata.
-	// secondo commit
-
 	/* Get RX message */
 	if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_rx_header, can_rx) != HAL_OK)
 		Error_Handler();
@@ -196,20 +198,22 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		case (uint32_t)(ID_PDO_00):
 			can_pdo_rx_cnt++;
 			idx = (uint16_t)can_rx_header.StdId - ID_PDO_00;
-			//memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
+			memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
 			send_usart_code = 1;
 			break;
 		/* Store PDO */
 		case (uint32_t)(ID_SDO_00):
 			can_sdo_rx_cnt++;
 			idx = (uint16_t)can_rx_header.StdId - ID_SDO_00;
-			//memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
-			//if (promise_sdo == (uint16_t)can_rx_header.StdId)
-			//	memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
+			memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
+			if (promise_sdo == (uint16_t)can_rx_header.StdId)
+				send_usart_code = 2;
+
 			break;
 		/* Ignore */
 		default:
 			can_inv_rx_cnt++;
+			send_usart_code = 0;
 			break;
 		}
 
@@ -280,32 +284,31 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			if (usart_tx_sdo_pending[8] == '\n')
 				usart_tx_sdo_pending[8] = 0x1A;
 			usart_tx_sdo_pending[9] = '\n';
+			memcpy(&(usart_tx[USART_MSG_LENGTH]), &(usart_tx_sdo_pending[0]), USART_MSG_LENGTH);
 			break;
 		default:
 			break;
 		}
 
 		/* Transmit only if PDO arrived  */
-		if (send_usart_code == 1)
+		switch (send_usart_code)
 		{
-			/* Push stored SDO in the packet */
-			if (0)// (usart_sdo_pending)
-			{
-				memcpy(&(usart_tx[USART_MSG_LENGTH]), &(usart_tx_sdo_pending[0]), USART_MSG_LENGTH);
-				if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, 2*USART_MSG_LENGTH)!= HAL_OK)
-					Error_Handler();
-				//usart_sdo_pending = 0;
-			}
-			/* no SDO stored */
-			else
-			{
-				if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
-					Error_Handler();
-			}
-			/* Display LED*/
-			if ((uint16_t)(can_rx_header.StdId & 0x0000FFFF) == ID_PDO_00)
-				BSP_LED_Toggle(LED3);
+		case 1:
+			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
+				Error_Handler();
+			break;
+		case 2:
+			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, 2*USART_MSG_LENGTH)!= HAL_OK)
+				Error_Handler();
+			promise_sdo = 0x0000;
+			break;
+		default:
+			break;
 		}
+
+		/* Display LED*/
+		if ((uint16_t)(can_rx_header.StdId & 0x0000FFFF) == ID_PDO_00)
+			BSP_LED_Toggle(LED3);
 	}
 }
 
