@@ -196,15 +196,16 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		case (uint32_t)(ID_PDO_00):
 			can_pdo_rx_cnt++;
 			idx = (uint16_t)can_rx_header.StdId - ID_PDO_00;
-			memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
+			//memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
+			send_usart_code = 1;
 			break;
 		/* Store PDO */
 		case (uint32_t)(ID_SDO_00):
 			can_sdo_rx_cnt++;
 			idx = (uint16_t)can_rx_header.StdId - ID_SDO_00;
-			memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
-			if (promise_sdo == (uint16_t)can_rx_header.StdId)
-				memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
+			//memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
+			//if (promise_sdo == (uint16_t)can_rx_header.StdId)
+			//	memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
 			break;
 		/* Ignore */
 		default:
@@ -288,12 +289,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 		if (send_usart_code == 1)
 		{
 			/* Push stored SDO in the packet */
-			if (usart_sdo_pending)
+			if (0)// (usart_sdo_pending)
 			{
 				memcpy(&(usart_tx[USART_MSG_LENGTH]), &(usart_tx_sdo_pending[0]), USART_MSG_LENGTH);
 				if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, 2*USART_MSG_LENGTH)!= HAL_OK)
 					Error_Handler();
-				usart_sdo_pending = 0;
+				//usart_sdo_pending = 0;
 			}
 			/* no SDO stored */
 			else

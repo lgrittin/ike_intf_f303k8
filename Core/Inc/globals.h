@@ -189,6 +189,7 @@ EXTERN float scr_cmd_alfa               DSPINIT(0.0f)   // [pu]
 EXTERN float igbt_actual_freq           DSPINIT(22.0f)  // [Hz]
 EXTERN uint32_t main_fsm_loop_cnt       DSPINIT(0U)
 EXTERN uint16_t scr_synch_invalid_cnt   DSPINIT(0U)     // [#]
+EXTERN float scr_synch_freq				DSPINIT(0.0f)   // [Hz]
 
 
 #endif /* INC_GLOBALS_H_ */
