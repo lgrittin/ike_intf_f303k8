@@ -1,5 +1,5 @@
-stm32f3xx_nucleo_32.c:127:10:BSP_GetVersion	0	static
-stm32f3xx_nucleo_32.c:139:6:BSP_LED_Init	48	static
-stm32f3xx_nucleo_32.c:163:6:BSP_LED_On	0	static
-stm32f3xx_nucleo_32.c:175:6:BSP_LED_Off	0	static
-stm32f3xx_nucleo_32.c:187:6:BSP_LED_Toggle	0	static
+../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.c:127:10:BSP_GetVersion	0	static
+../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.c:139:6:BSP_LED_Init	48	static
+../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.c:163:6:BSP_LED_On	0	static
+../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.c:175:6:BSP_LED_Off	0	static
+../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.c:187:6:BSP_LED_Toggle	0	static

@@ -161,35 +161,75 @@ typedef struct {
 /* ## EXTERNAL Vars ################################################### */
 
 /* PDO and SDO */
-extern uint16_t en_pdo_send;
+extern uint16_t en_can_send;
 extern uint16_t can_error_flag;
 extern uint32_t pdo_tx_g170_msg_cnt;
-/* SDO */
+/* general */
 EXTERN uint16_t dummy_location          DSPINIT(0U)
 EXTERN uint32_t main_fsm_loop_cnt       DSPINIT(0U)
+/* variables for analog in */
 EXTERN ADC adc                          DSPINIT(ADC_DEFAULT)
-EXTERN CMD_WD1 cmd_wd_1                 DSPINIT({0U})
-EXTERN uint16_t init_cnt_end            DSPINIT(1000U)  // [ms]
-EXTERN uint16_t scr_synch_estim_cnt_end DSPINIT(1000U)  // [ms]
-EXTERN uint16_t scr_synch_invalid_cnt   DSPINIT(0U)     // [#]
-EXTERN uint16_t en_manual_alfa          DSPINIT(0U)     // [#]
-EXTERN float scr_cmd_alfa_set           DSPINIT(0.0f)   // [pu]
-EXTERN float scr_cmd_alfa_check_50hz    DSPINIT(0.1f)   // [pu]
-EXTERN float scr_cmd_alfa_check_60hz    DSPINIT(0.1f)   // [pu]
-EXTERN uint16_t freeze_scr_ramp_cnt_end DSPINIT(1000U)  // [ms]
-EXTERN float scr_cmd_alfa_increment     DSPINIT(0.001f) // [pu/ms]
-EXTERN float igbt_main_freq             DSPINIT(0.5f)   // [Hz]
-EXTERN float sweep_amplitude            DSPINIT(0.3f)   // [Hz]
-EXTERN float sweep_freq                 DSPINIT(0.1f)   // [Hz]
-EXTERN float i_inv_oc                   DSPINIT(2.0f)   // [A]
-/* PDO */
+/* variables for digital in start_cmd */
+EXTERN uint16_t start_cmd_counter       DSPINIT(0U)     // [ms]
+EXTERN uint16_t start_cmd_filter        DSPINIT(20U)    // [ms]
+EXTERN uint16_t start_cmd_qualified     DSPINIT(0U)
+EXTERN uint16_t start_cmd_qualified_d   DSPINIT(0U)
+/* variables for digital in oh1 */
+EXTERN uint16_t oh1_counter             DSPINIT(0U)     // [ms]
+EXTERN uint16_t oh1_filter              DSPINIT(20U)    // [ms]
+EXTERN uint16_t oh1_qualified           DSPINIT(0U)
+EXTERN uint16_t fault_ack               DSPINIT(0U)
+EXTERN uint16_t fault_ack_d             DSPINIT(0U)
+EXTERN uint16_t resetting_faults        DSPINIT(0U)
+/* variables for digital in oh2 */
+EXTERN uint16_t oh2_counter             DSPINIT(0U)     // [ms]
+EXTERN uint16_t oh2_filter              DSPINIT(20U)    // [ms]
+EXTERN uint16_t oh2_qualified           DSPINIT(0U)
+/* variables for digital in flt_sup */
+EXTERN uint16_t flt_sup_counter         DSPINIT(0U)     // [ms]
+EXTERN uint16_t flt_sup_filter          DSPINIT(10U)    // [ms]
+EXTERN uint16_t flt_sup_qualified       DSPINIT(0U)
+/* variables for digital in flt_gd */
+EXTERN uint16_t flt_gd_counter          DSPINIT(0U)     // [ms]
+EXTERN uint16_t flt_gd_filter           DSPINIT(0U)     // [ms]
+EXTERN uint16_t flt_gd_qualified        DSPINIT(0U)
+/* fsm, sts_wd, alm_wd */
 EXTERN STS_WD1 sts_wd_1                 DSPINIT({0U})
 EXTERN ALM_WD1 alm_wd_1                 DSPINIT({0U})
-EXTERN float scr_cmd_alfa               DSPINIT(0.0f)   // [pu]
-EXTERN float igbt_actual_freq           DSPINIT(22.0f)  // [Hz]
-EXTERN uint32_t main_fsm_loop_cnt       DSPINIT(0U)
+EXTERN CMD_WD1 cmd_wd_1                 DSPINIT({0U})
+EXTERN uint16_t init_cnt_ms             DSPINIT(0U)     // [ms]
+EXTERN uint16_t init_cnt_end            DSPINIT(1000U)  // [ms]
+/* variables for ecap input frequency measure */
+EXTERN uint32_t ecap_scr_synch_freq_int_cnt     DSPINIT(0UL)
+EXTERN float scr_synch_freq             DSPINIT(0.0f)   // [Hz]
+EXTERN float scr_synch_freq_bound       DSPINIT(2.0f)   // [Hz]
+EXTERN uint16_t scr_synch_estim_cnt_ms  DSPINIT(0U)     // [ms]
+EXTERN uint16_t scr_synch_estim_cnt_end DSPINIT(1000U)  // [ms]
 EXTERN uint16_t scr_synch_invalid_cnt   DSPINIT(0U)     // [#]
-
+/* variables for scr drivers */
+EXTERN uint16_t en_manual_alfa          DSPINIT(0U)     // [#]
+EXTERN uint16_t scr_cmd_prd             DSPINIT(15000U) // [epwmclk]
+EXTERN uint16_t scr_cmd_cmpa            DSPINIT(20000U) // [epwmclk]
+EXTERN uint16_t scr_cmd_cmpb            DSPINIT(13000U) // [epwmclk]
+EXTERN float scr_cmd_alfa_set           DSPINIT(0.0f)   // [pu]
+EXTERN float scr_cmd_alfa               DSPINIT(0.0f)   // [pu]
+EXTERN float scr_cmd_alfa_check_50hz    DSPINIT(0.1f)   // [pu]
+EXTERN float scr_cmd_alfa_check_60hz    DSPINIT(0.1f)   // [pu]
+EXTERN float scr_cmd_alfa_increment     DSPINIT(0.001f) // [pu/ms]
+EXTERN uint16_t freeze_scr_ramp_cnt_ms  DSPINIT(0U)     // [ms]
+EXTERN uint16_t freeze_scr_ramp_cnt_end DSPINIT(1000U)  // [ms]
+/* variables for igbt drivers */
+EXTERN uint16_t igbt_cmd_prd            DSPINIT(3000U)  // [epwmclk]
+EXTERN uint16_t igbt_cmd_sweep          DSPINIT(0U)     // [epwmclk]
+EXTERN uint16_t freeze_sweep_cnt_ms     DSPINIT(0U)     // [ms]
+EXTERN uint16_t freeze_sweep_cnt_end    DSPINIT(0U)     // [ms]
+EXTERN float igbt_main_freq             DSPINIT(0.5f)   // [Hz]
+EXTERN float igbt_actual_freq           DSPINIT(0.5f)   // [Hz]
+EXTERN float sweep_amplitude            DSPINIT(0.3f)   // [Hz]
+EXTERN float sweep_freq                 DSPINIT(0.1f)   // [Hz]
+/* variables for cmpss overcurrent */
+EXTERN uint16_t overcurr_ac_detect      DSPINIT(0U)
+EXTERN float i_inv_oc                   DSPINIT(2.0f)   // [A]
 
 #endif /* INC_GLOBALS_H_ */
 

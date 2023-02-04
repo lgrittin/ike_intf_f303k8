@@ -17,7 +17,10 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include "main.h"
 #include "usart.h"
+#include "param_process_data.h"
+#include "globals.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -36,7 +39,7 @@ uint32_t usart_tx_msg_cnt = 0;
 uint32_t usart_rx_msg_cnt = 0;
 uint8_t usart_rx_chksum_err = 0;
 uint8_t en_send_can = 0;
-static uint16_t promise_sdo = 0x0000;
+uint16_t promise_sdo = 0x0000;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -195,8 +198,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
 		Error_Handler();
 	usart_rx_msg_cnt++;
-
-	// modifica a casaccio
 
 	/**
 	 * USART Msg Structure:

@@ -1,6 +1,6 @@
 ################################################################################
 # Automatically-generated file. Do not edit!
-# Toolchain: GNU Tools for STM32 (9-2020-q2-update)
+# Toolchain: GNU Tools for STM32 (10.3-2021.10)
 ################################################################################
 
 -include ../makefile.init
@@ -45,6 +45,9 @@ BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ART
 EXECUTABLES += \
 STM32F303K8_NUCLEO.elf \
 
+MAP_FILES += \
+STM32F303K8_NUCLEO.map \
+
 SIZE_OUTPUT += \
 default.size.stdout \
 
@@ -62,7 +65,7 @@ all: main-build
 main-build: STM32F303K8_NUCLEO.elf secondary-outputs
 
 # Tool invocations
-STM32F303K8_NUCLEO.elf: $(OBJS) $(USER_OBJS) ../STM32F303K8Tx_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+STM32F303K8_NUCLEO.elf STM32F303K8_NUCLEO.map: $(OBJS) $(USER_OBJS) ../STM32F303K8Tx_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	arm-none-eabi-gcc -o "STM32F303K8_NUCLEO.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"../STM32F303K8Tx_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F303K8_NUCLEO.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
@@ -84,7 +87,7 @@ STM32F303K8_NUCLEO.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEP
 
 # Other Targets
 clean:
-	-$(RM) STM32F303K8_NUCLEO.bin STM32F303K8_NUCLEO.elf STM32F303K8_NUCLEO.list default.size.stdout
+	-$(RM) STM32F303K8_NUCLEO.bin STM32F303K8_NUCLEO.elf STM32F303K8_NUCLEO.list STM32F303K8_NUCLEO.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_BIN)

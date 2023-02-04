@@ -22,8 +22,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "param_process_data.h"
-#include "globals.h"
+#include "usart.h"
+#include "can.h"
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -75,6 +75,8 @@ int main(void)
 	while (1)
 	{
 		//HAL_Delay(500);
+		BSP_LED_Toggle(LED3);
+		cnt++;
 	}
 }
 
