@@ -39,6 +39,10 @@
 
 extern void Error_Handler(void);
 
+/* Exported variables ------------------------------------------------------- */
+
+extern uint32_t cnt;
+
 #endif /* __MAIN_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

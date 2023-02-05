@@ -64,7 +64,7 @@ void MX_CAN1_Init(void)
     hcan.Init.TransmitFifoPriority = DISABLE;
     hcan.Init.Mode = CAN_MODE_NORMAL;
     hcan.Init.SyncJumpWidth = CAN_SJW_3TQ;
-    hcan.Init.TimeSeg1 = CAN_BS1_15TQ;
+    hcan.Init.TimeSeg1 = CAN_BS1_13TQ;
     hcan.Init.TimeSeg2 = CAN_BS2_2TQ;
     hcan.Init.Prescaler = 4;
     if (HAL_CAN_Init(&hcan) != HAL_OK)
