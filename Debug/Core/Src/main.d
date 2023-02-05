@@ -22,12 +22,14 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_flash_ex.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_pwr.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_pwr_ex.h \
+ ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_tim.h \
+ ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_tim_ex.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart.h \
  ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h \
  ../Drivers/BSP/STM32F3xx_Nucleo_32/stm32f3xx_nucleo_32.h \
  ../Core/Inc/param_process_data.h ../Core/Inc/can.h ../Core/Inc/usart.h \
- ../Core/Inc/can.h ../Core/Inc/usart.h ../Core/Inc/globals.h \
- ../Core/Inc/param_process_data.h
+ ../Core/Inc/tim.h ../Core/Inc/can.h ../Core/Inc/usart.h \
+ ../Core/Inc/tim.h ../Core/Inc/globals.h ../Core/Inc/param_process_data.h
 
 ../Core/Inc/main.h:
 
@@ -77,6 +79,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_pwr_ex.h:
 
+../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_tim.h:
+
+../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_tim_ex.h:
+
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart.h:
 
 ../Drivers/STM32F3xx_HAL_Driver/Inc/stm32f3xx_hal_uart_ex.h:
@@ -89,9 +95,13 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 
 ../Core/Inc/usart.h:
 
+../Core/Inc/tim.h:
+
 ../Core/Inc/can.h:
 
 ../Core/Inc/usart.h:
+
+../Core/Inc/tim.h:
 
 ../Core/Inc/globals.h:
 

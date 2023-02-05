@@ -1,8 +1,7 @@
 /**
   ******************************************************************************
-  * @file    UART/UART_HyperTerminal_DMA/Inc/stm32f3xx_it.h
-  * @author  MCD Application Team
-  * @brief   This file contains the headers of the interrupt handlers.
+  * @file    tim.h
+  * @brief   Header for tim.c module
   ******************************************************************************
   * @attention
   *
@@ -18,43 +17,38 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __STM32F3xx_IT_H
-#define __STM32F3xx_IT_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef _TIM_H_
+#define _TIM_H_
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f3xx_hal.h"
+#include "stm32f3xx_nucleo_32.h"
+#include "param_process_data.h"
 
 /* Exported types ------------------------------------------------------------*/
 
 /* Exported constants --------------------------------------------------------*/
 
+/* Definition for TIMx clock resources */
+#define TIMx                           TIM2
+#define TIMx_CLK_ENABLE                __HAL_RCC_TIM2_CLK_ENABLE
+
+/* Definition for TIMx's NVIC */
+#define TIMx_IRQn                      TIM2_IRQn
+#define TIMx_IRQHandler                TIM2_IRQHandler
+
+/* Exported variables ------------------------------------------------------- */
+
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions ------------------------------------------------------- */
 
-void NMI_Handler(void);
-void HardFault_Handler(void);
-void MemManage_Handler(void);
-void BusFault_Handler(void);
-void UsageFault_Handler(void);
-void SVC_Handler(void);
-void DebugMon_Handler(void);
-void PendSV_Handler(void);
-void SysTick_Handler(void);
+void MX_TIM2_Init(void);
 
-void USARTx_DMA_RX_IRQHandler(void);
-void USARTx_DMA_TX_IRQHandler(void);
-void USARTx_IRQHandler(void);
-//void CANx_RX_IRQHandler(void);
-void TIMx_IRQHandler(void);
+/* Exported variables ------------------------------------------------------- */
 
-#ifdef __cplusplus
-}
-#endif
+extern TIM_HandleTypeDef htim2;
 
-#endif /* __STM32F3xx_IT_H */
+#endif /* _TIM_H_ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

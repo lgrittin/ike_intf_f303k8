@@ -10,6 +10,7 @@ C_SRCS += \
 ../Core/Src/param_process_data.c \
 ../Core/Src/stm32f3xx_hal_msp.c \
 ../Core/Src/stm32f3xx_it.c \
+../Core/Src/tim.c \
 ../Core/Src/usart.c 
 
 OBJS += \
@@ -18,6 +19,7 @@ OBJS += \
 ./Core/Src/param_process_data.o \
 ./Core/Src/stm32f3xx_hal_msp.o \
 ./Core/Src/stm32f3xx_it.o \
+./Core/Src/tim.o \
 ./Core/Src/usart.o 
 
 C_DEPS += \
@@ -26,6 +28,7 @@ C_DEPS += \
 ./Core/Src/param_process_data.d \
 ./Core/Src/stm32f3xx_hal_msp.d \
 ./Core/Src/stm32f3xx_it.d \
+./Core/Src/tim.d \
 ./Core/Src/usart.d 
 
 
@@ -36,7 +39,7 @@ Core/Src/%.o: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/can.d ./Core/Src/can.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/param_process_data.d ./Core/Src/param_process_data.o ./Core/Src/stm32f3xx_hal_msp.d ./Core/Src/stm32f3xx_hal_msp.o ./Core/Src/stm32f3xx_it.d ./Core/Src/stm32f3xx_it.o ./Core/Src/usart.d ./Core/Src/usart.o
+	-$(RM) ./Core/Src/can.d ./Core/Src/can.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/param_process_data.d ./Core/Src/param_process_data.o ./Core/Src/stm32f3xx_hal_msp.d ./Core/Src/stm32f3xx_hal_msp.o ./Core/Src/stm32f3xx_it.d ./Core/Src/stm32f3xx_it.o ./Core/Src/tim.d ./Core/Src/tim.o ./Core/Src/usart.d ./Core/Src/usart.o
 
 .PHONY: clean-Core-2f-Src
 

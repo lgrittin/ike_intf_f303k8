@@ -27,6 +27,7 @@
 #include "param_process_data.h"
 #include "can.h"
 #include "usart.h"
+#include "tim.h"
 
 /* Exported types ------------------------------------------------------------*/
 

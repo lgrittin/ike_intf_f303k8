@@ -33,6 +33,7 @@
 
 extern UART_HandleTypeDef huart2;
 extern CAN_HandleTypeDef hcan;
+extern TIM_HandleTypeDef htim2;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -190,6 +191,16 @@ void USARTx_IRQHandler(void)
 void CANx_RX_IRQHandler(void)
 {
   HAL_CAN_IRQHandler(&hcan);
+}
+
+/**
+  * @brief  This function handles TIM interrupt request.
+  * @param  None
+  * @retval None
+  */
+void TIMx_IRQHandler(void)
+{
+  HAL_TIM_IRQHandler(&htim2);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
