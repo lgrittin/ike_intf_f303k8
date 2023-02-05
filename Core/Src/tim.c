@@ -17,7 +17,6 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-
 #include "tim.h"
 #include "main.h"
 #include "globals.h"
@@ -42,9 +41,9 @@ uint32_t uwPrescalerValue = 0;
 /* TIM2 init function */
 void MX_TIM2_Init(void)
 {
-	uwPrescalerValue = (uint32_t) (/*SystemCoreClock*/8000000 / 10000) - 1;
+	uwPrescalerValue = (uint32_t) (SystemCoreClock / 10000) - 1;
 	htim2.Instance = TIMx;
-	htim2.Init.Period = 10000 - 1;	//2^32
+	htim2.Init.Period = 1000 - 1;	//2^32
 	htim2.Init.Prescaler = uwPrescalerValue;
 	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -107,7 +106,7 @@ void HAL_TIM_MspDeInit(TIM_HandleTypeDef* htim)
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    //BSP_LED_Toggle(LED3);
+    BSP_LED_Toggle(LED3);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
