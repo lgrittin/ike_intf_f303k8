@@ -199,116 +199,153 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 			can_pdo_rx_cnt++;
 			idx = (uint16_t)can_rx_header.StdId - ID_PDO_00;
 			memcpy(process_data[idx].val, &(can_rx[0]), process_data[idx].num_byte);
-			send_usart_code = 1;
+			//send_usart_code = 1;
 			break;
 		/* Store PDO */
 		case (uint32_t)(ID_SDO_00):
 			can_sdo_rx_cnt++;
 			idx = (uint16_t)can_rx_header.StdId - ID_SDO_00;
 			memcpy(param_data[idx].val, &(can_rx[0]), param_data[idx].num_byte);
-			if (promise_sdo == (uint16_t)can_rx_header.StdId)
-				send_usart_code = 2;
+			//if (promise_sdo == (uint16_t)can_rx_header.StdId)
+				//send_usart_code = 2;
 
 			break;
 		/* Ignore */
 		default:
 			can_inv_rx_cnt++;
-			send_usart_code = 0;
+			//send_usart_code = 0;
 			break;
 		}
 
-		switch (send_usart_code)
+		/* Fill usart_tx_queue */
+		usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
+		usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
+		usart_tx[2] = can_rx[0];
+		usart_tx[3] = can_rx[1];
+		usart_tx[4] = can_rx[2];
+		usart_tx[5] = can_rx[3];
+		usart_tx[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
+		for (i=0; i<7; i++)
 		{
-		/* Fill usart_tx with PDO */
-		case 1:
-			usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
-			usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
-			usart_tx[2] = can_rx[0];
-			usart_tx[3] = can_rx[1];
-			usart_tx[4] = can_rx[2];
-			usart_tx[5] = can_rx[3];
-			usart_tx[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
-			for (i=0; i<7; i++)
+			if (usart_tx[i] == '\n')
 			{
-				if (usart_tx[i] == '\n')
-				{
-					usart_tx[i] = 0x1A;
-					en_artifact |= (uint8_t)(0x0001 << (7-i));
-				}
+				usart_tx[i] = 0x1A;
+				en_artifact |= (uint8_t)(0x0001 << (7-i));
 			}
-			if (en_artifact == '\n')
-				en_artifact = 0x01;
-			usart_tx[7] = (uint8_t)en_artifact;
-			usart_tx[8] = 0xA5 ^ \
-					usart_tx[0] ^ \
-					usart_tx[1] ^ \
-					usart_tx[2] ^ \
-					usart_tx[3] ^ \
-					usart_tx[4] ^ \
-					usart_tx[5] ^ \
-					usart_tx[6] ^ \
-					usart_tx[7];
-			if (usart_tx[8] == '\n')
-				usart_tx[8] = 0x1A;
-			usart_tx[9] = '\n';
-			break;
-		/* Fill usart_tx_additional with SDO */
-		case 2:
-			usart_tx_sdo_pending[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
-			usart_tx_sdo_pending[1] = (can_rx_header.StdId & 0x000000FF);
-			usart_tx_sdo_pending[2] = can_rx[0];
-			usart_tx_sdo_pending[3] = can_rx[1];
-			usart_tx_sdo_pending[4] = can_rx[2];
-			usart_tx_sdo_pending[5] = can_rx[3];
-			usart_tx_sdo_pending[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
-			for (i=0; i<7; i++)
-			{
-				if (usart_tx_sdo_pending[i] == '\n')
-				{
-					usart_tx_sdo_pending[i] = 0x1A;
-					en_artifact |= (uint8_t)(0x0001 << (7-i));
-				}
-			}
-			if (en_artifact == '\n')
-				en_artifact = 0x01;
-			usart_tx_sdo_pending[7] = (uint8_t)en_artifact;
-			usart_tx_sdo_pending[8] = 0xA5 ^ \
-					usart_tx_sdo_pending[0] ^ \
-					usart_tx_sdo_pending[1] ^ \
-					usart_tx_sdo_pending[2] ^ \
-					usart_tx_sdo_pending[3] ^ \
-					usart_tx_sdo_pending[4] ^ \
-					usart_tx_sdo_pending[5] ^ \
-					usart_tx_sdo_pending[6] ^ \
-					usart_tx_sdo_pending[7];
-			if (usart_tx_sdo_pending[8] == '\n')
-				usart_tx_sdo_pending[8] = 0x1A;
-			usart_tx_sdo_pending[9] = '\n';
-			memcpy(&(usart_tx[USART_MSG_LENGTH]), &(usart_tx_sdo_pending[0]), USART_MSG_LENGTH);
-			break;
-		default:
-			break;
 		}
+		if (en_artifact == '\n')
+			en_artifact = 0x01;
+		usart_tx[7] = (uint8_t)en_artifact;
+		usart_tx[8] = 0xA5 ^ usart_tx[0] ^ usart_tx[1] ^ usart_tx[2] ^ \
+				usart_tx[3] ^ usart_tx[4] ^ usart_tx[5] ^ usart_tx[6] ^ usart_tx[7];
+		if (usart_tx[8] == '\n')
+			usart_tx[8] = 0x1A;
+		usart_tx[9] = '\n';
+
+
+
+
+
+
+
+
+
+
+
+
+
+//		switch (send_usart_code)
+//		{
+//		/* Fill usart_tx with PDO */
+//		case 1:
+//			usart_tx[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
+//			usart_tx[1] = (can_rx_header.StdId & 0x000000FF);
+//			usart_tx[2] = can_rx[0];
+//			usart_tx[3] = can_rx[1];
+//			usart_tx[4] = can_rx[2];
+//			usart_tx[5] = can_rx[3];
+//			usart_tx[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
+//			for (i=0; i<7; i++)
+//			{
+//				if (usart_tx[i] == '\n')
+//				{
+//					usart_tx[i] = 0x1A;
+//					en_artifact |= (uint8_t)(0x0001 << (7-i));
+//				}
+//			}
+//			if (en_artifact == '\n')
+//				en_artifact = 0x01;
+//			usart_tx[7] = (uint8_t)en_artifact;
+//			usart_tx[8] = 0xA5 ^ \
+//					usart_tx[0] ^ \
+//					usart_tx[1] ^ \
+//					usart_tx[2] ^ \
+//					usart_tx[3] ^ \
+//					usart_tx[4] ^ \
+//					usart_tx[5] ^ \
+//					usart_tx[6] ^ \
+//					usart_tx[7];
+//			if (usart_tx[8] == '\n')
+//				usart_tx[8] = 0x1A;
+//			usart_tx[9] = '\n';
+//			break;
+//		/* Fill usart_tx_additional with SDO */
+//		case 2:
+//			usart_tx_sdo_pending[0] = ((can_rx_header.StdId & 0x0000FF00) >> 8);
+//			usart_tx_sdo_pending[1] = (can_rx_header.StdId & 0x000000FF);
+//			usart_tx_sdo_pending[2] = can_rx[0];
+//			usart_tx_sdo_pending[3] = can_rx[1];
+//			usart_tx_sdo_pending[4] = can_rx[2];
+//			usart_tx_sdo_pending[5] = can_rx[3];
+//			usart_tx_sdo_pending[6] = (uint8_t)(usart_rx_chksum_err & 0xFF);
+//			for (i=0; i<7; i++)
+//			{
+//				if (usart_tx_sdo_pending[i] == '\n')
+//				{
+//					usart_tx_sdo_pending[i] = 0x1A;
+//					en_artifact |= (uint8_t)(0x0001 << (7-i));
+//				}
+//			}
+//			if (en_artifact == '\n')
+//				en_artifact = 0x01;
+//			usart_tx_sdo_pending[7] = (uint8_t)en_artifact;
+//			usart_tx_sdo_pending[8] = 0xA5 ^ \
+//					usart_tx_sdo_pending[0] ^ \
+//					usart_tx_sdo_pending[1] ^ \
+//					usart_tx_sdo_pending[2] ^ \
+//					usart_tx_sdo_pending[3] ^ \
+//					usart_tx_sdo_pending[4] ^ \
+//					usart_tx_sdo_pending[5] ^ \
+//					usart_tx_sdo_pending[6] ^ \
+//					usart_tx_sdo_pending[7];
+//			if (usart_tx_sdo_pending[8] == '\n')
+//				usart_tx_sdo_pending[8] = 0x1A;
+//			usart_tx_sdo_pending[9] = '\n';
+//			memcpy(&(usart_tx[USART_MSG_LENGTH]), &(usart_tx_sdo_pending[0]), USART_MSG_LENGTH);
+//			break;
+//		default:
+//			break;
+//		}
 
 		/* Transmit only if PDO arrived  */
-		switch (send_usart_code)
-		{
-		case 1:
-			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
-				Error_Handler();
-			break;
-		case 2:
-			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, 2*USART_MSG_LENGTH)!= HAL_OK)
-				Error_Handler();
-			promise_sdo = 0x0000;
-			break;
-		default:
-			break;
-		}
-
-		/* Display LED*/
-		if ((uint16_t)(can_rx_header.StdId & 0x0000FFFF) == ID_PDO_00)
-			BSP_LED_Toggle(LED3);
+//		switch (send_usart_code)
+//		{
+//		case 1:
+//			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, USART_MSG_LENGTH)!= HAL_OK)
+//				Error_Handler();
+//			break;
+//		case 2:
+//			if(HAL_UART_Transmit_IT(&huart2, (uint8_t*)usart_tx, 2*USART_MSG_LENGTH)!= HAL_OK)
+//				Error_Handler();
+//			promise_sdo = 0x0000;
+//			break;
+//		default:
+//			break;
+//		}
+//
+//		/* Display LED*/
+//		if ((uint16_t)(can_rx_header.StdId & 0x0000FFFF) == ID_PDO_00)
+//			BSP_LED_Toggle(LED3);
 	}
 }
 

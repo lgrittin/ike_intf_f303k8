@@ -25,6 +25,15 @@
 
 /* Private typedef -----------------------------------------------------------*/
 
+typedef struct {
+	uint8_t data_id[2];
+	uint8_t data_val[4];
+	uint8_t sts;
+	uint8_t artifact;
+	uint8_t checksum;
+	uint8_t lf;
+} USART_TX_MSG;
+
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
@@ -34,7 +43,7 @@
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_tx;
 DMA_HandleTypeDef hdma_rx;
-uint8_t usart_tx[2*USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t usart_tx[USART_MSG_LENGTH][USART_QUEUE_LENGTH];
 uint8_t usart_rx[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t usart_tx_msg_cnt = 0;
 uint32_t usart_rx_msg_cnt = 0;
@@ -49,6 +58,15 @@ uint16_t promise_sdo = 0x0000;
 /* USART2 init function */
 void MX_USART2_UART_Init(void)
 {
+	uint16_t i, k;
+	for (i = 0; i < USART_QUEUE_LENGTH; i++)
+	{
+		for (j = 0; j < USART_MSG_LENGTH; j++)
+		{
+			usart_tx[i][j]
+		}
+	}
+
 	huart2.Instance = USART2;
 	huart2.Init.BaudRate = 115200;
 	huart2.Init.WordLength = UART_WORDLENGTH_8B;
