@@ -147,8 +147,8 @@ typedef struct {
 } ADC;
 #define ADC_DEFAULT { \
     0U, 0U, 0.0f, 0.0f, \
-    0U, 0U, 0U, 0U, 0U, 0U, 0.0f, 0.0f, \
-    0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0.0f, 0.0f, 0.0f \
+    0U, 0U, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, \
+    0U, 0U, 0U, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f \
 }
 
 
