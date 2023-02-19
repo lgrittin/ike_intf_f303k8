@@ -65,8 +65,7 @@ int main(void)
 	/* Configure LED3 */
 	BSP_LED_Init(LED3);
 
-	/* Init TIM2 */
-	MX_TIM2_Init();
+	/* Init Vars */
 
 	/* Init UART2 + DMA for PC communication */
 	MX_USART2_UART_Init();
@@ -77,12 +76,8 @@ int main(void)
 	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
 		Error_Handler();
 
-	/* Infinite loop */
-	while (1)
-	{
-		HAL_Delay(500);
-		cnt++;
-	}
+	while(1)
+	{}
 }
 
 /**

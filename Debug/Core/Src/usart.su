@@ -1,6 +1,10 @@
-usart.c:50:6:MX_USART2_UART_Init	8	static
-usart.c:78:6:HAL_UART_MspInit	72	static
-usart.c:154:6:HAL_UART_MspDeInit	8	static
-usart.c:180:6:HAL_UART_TxCpltCallback	0	static
-usart.c:192:6:HAL_UART_RxCpltCallback	32	static
-usart.c:288:6:HAL_UART_ErrorCallback	0	static
+usart.c:56:6:MX_USART2_UART_Init	8	static
+usart.c:86:6:HAL_UART_MspInit	72	static
+usart.c:162:6:HAL_UART_MspDeInit	8	static
+usart.c:188:6:HAL_UART_TxCpltCallback	0	static
+usart.c:200:6:HAL_UART_RxCpltCallback	32	static
+usart.c:369:6:calc_artifact	0	static
+usart.c:362:6:fill_usart_tx	16	static
+usart.c:295:6:send_pdo_usart	32	static
+usart.c:380:6:calc_chksm	0	static
+usart.c:392:6:HAL_UART_ErrorCallback	0	static

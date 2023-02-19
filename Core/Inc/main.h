@@ -28,6 +28,7 @@
 #include "can.h"
 #include "usart.h"
 #include "tim.h"
+#include <string.h>
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -40,8 +41,6 @@
 extern void Error_Handler(void);
 
 /* Exported variables ------------------------------------------------------- */
-
-extern uint32_t cnt;
 
 #endif /* __MAIN_H */
 

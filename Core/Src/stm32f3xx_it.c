@@ -138,7 +138,13 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-  HAL_IncTick();
+	HAL_IncTick();
+	send_usart_cnt_ms++;
+	if ((send_usart_cnt_ms > send_usart_tim_ms) && (en_usart_tx))
+	{
+		send_pdo_usart();
+		send_usart_cnt_ms = 0;
+	}
 }
 
 /******************************************************************************/

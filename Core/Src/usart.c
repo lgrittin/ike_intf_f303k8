@@ -25,15 +25,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 
-typedef struct {
-	uint8_t data_id[2];
-	uint8_t data_val[4];
-	uint8_t sts;
-	uint8_t artifact;
-	uint8_t checksum;
-	uint8_t lf;
-} USART_TX_MSG;
-
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
@@ -43,13 +34,19 @@ typedef struct {
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_tx;
 DMA_HandleTypeDef hdma_rx;
-uint8_t usart_tx[USART_MSG_LENGTH][USART_QUEUE_LENGTH];
+USART_TX_MSG usart_tx;
 uint8_t usart_rx[USART_MSG_LENGTH] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 uint32_t usart_tx_msg_cnt = 0;
 uint32_t usart_rx_msg_cnt = 0;
 uint8_t usart_rx_chksum_err = 0;
 uint8_t en_send_can = 0;
 uint16_t promise_sdo = 0x0000;
+uint8_t en_usart_tx_sdo = 0;
+uint16_t usart_tx_idx = 0;
+uint8_t usart_tx_mutex = 0;
+uint8_t en_usart_tx = 0;
+uint32_t send_usart_cnt_ms = 0;
+uint32_t send_usart_tim_ms = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -58,14 +55,7 @@ uint16_t promise_sdo = 0x0000;
 /* USART2 init function */
 void MX_USART2_UART_Init(void)
 {
-	uint16_t i, k;
-	for (i = 0; i < USART_QUEUE_LENGTH; i++)
-	{
-		for (j = 0; j < USART_MSG_LENGTH; j++)
-		{
-			usart_tx[i][j]
-		}
-	}
+	send_usart_tim_ms = 5;	// send usart msg every x [ms]
 
 	huart2.Instance = USART2;
 	huart2.Init.BaudRate = 115200;
@@ -294,6 +284,102 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		usart_rx[8] = 0;
 		usart_rx[9] = 0;
 	}
+}
+
+/**
+  * @brief  Send PDO Data through Serial Tx
+  * @param  None
+  * @note   None
+  * @retval None
+  */
+void send_pdo_usart(void)
+{
+	uint8_t en_artifact = 0;
+	uint8_t chksm = 0xA5;
+	uint8_t data_val[4] = {0, 0, 0, 0};
+	uint8_t data_id[2] = {0, 0};
+	uint16_t idx = 0;
+
+	//BSP_LED_On(LED3);
+
+	/**
+      * USART Msg Structure:
+      *
+      * idx:	[0]   [1]   [2]     [3]     [4]     [5]     [6]   [7]        [8]	 [9]
+      *  	---------------------------------------------------------------------------
+      *  	| ID1 | ID0 | DATA3 | DATA2 | DATA1 | DATA0 | STS | ARTIFACT | CHKSM | LF |
+      *  	---------------------------------------------------------------------------
+      /
+
+	/* Copy Data Locally */
+	if (en_usart_tx_sdo)
+	{
+		idx = promise_sdo - ID_SDO_00;
+		memcpy(&(data_val[0]), param_data[idx].val, param_data[idx].num_byte);
+		data_id[0] = (uint8_t)((param_data[idx].id & 0x0000FF00) >> 8);
+		data_id[1] = (uint8_t)(param_data[idx].id & 0x000000FF);
+	}
+	else
+	{
+		memcpy(&(data_val[0]), process_data[usart_tx_idx].val, process_data[usart_tx_idx].num_byte);
+		data_id[0] = (uint8_t)((process_data[usart_tx_idx].id & 0x0000FF00) >> 8);
+		data_id[1] = (uint8_t)(process_data[usart_tx_idx].id & 0x000000FF);
+	}
+
+
+	/* Fill usart_tx */
+	fill_usart_tx(&en_artifact, &usart_tx.data_id[0], data_id[0], 0, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.data_id[1], data_id[1], 1, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.data_val[0], data_val[0], 2, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.data_val[1], data_val[1], 3, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.data_val[2], data_val[2], 4, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.data_val[3], data_val[3], 5, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.sts, usart_rx_chksum_err, 6, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.artifact,
+			((en_artifact == 0x0A) ? (0x01) : (en_artifact)), 7, &chksm);
+	fill_usart_tx(&en_artifact, &usart_tx.checksum, chksm, 8, &chksm);
+	usart_tx.lf = 0x0A;
+
+	/* Send Msg Tx */
+	if(HAL_UART_Transmit_IT(&huart2, &usart_tx.data_id[0], USART_MSG_LENGTH)!= HAL_OK)
+		Error_Handler();
+
+	//BSP_LED_Off(LED3);
+
+	if (en_usart_tx_sdo)
+	{
+		en_usart_tx_sdo = 0;
+		promise_sdo = 0;
+	}
+	else
+	{
+		usart_tx_idx++;
+		if (usart_tx_idx >= PDO_LENGTH)
+			usart_tx_idx = 0;
+	}
+}
+
+void fill_usart_tx(uint8_t *en_artifact, uint8_t *serial_tx, uint8_t val, uint16_t pos,
+		uint8_t *checksum)
+{
+	calc_artifact(en_artifact, serial_tx, val, pos);
+	calc_chksm(serial_tx, checksum);
+}
+
+void calc_artifact(uint8_t *en_artifact, uint8_t *serial_tx, uint8_t val, uint16_t pos)
+{
+	if (val == 0x0A)
+	{
+		*serial_tx = 0x1A;
+		*en_artifact |= (uint8_t)(0x0001 << (7-pos));
+	}
+	else
+		*serial_tx = val;
+}
+
+void calc_chksm(uint8_t *serial_tx, uint8_t *checksum)
+{
+	*checksum ^= *serial_tx;
 }
 
 /**

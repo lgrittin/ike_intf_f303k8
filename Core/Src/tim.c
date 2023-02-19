@@ -106,7 +106,7 @@ void HAL_TIM_MspDeInit(TIM_HandleTypeDef* htim)
   */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    cnt++;	//BSP_LED_Toggle(LED3);
+    //cnt++;	//BSP_LED_Toggle(LED3);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

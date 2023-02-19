@@ -27,6 +27,15 @@
 
 /* Exported types ------------------------------------------------------------*/
 
+typedef struct {
+	uint8_t data_id[2];
+	uint8_t data_val[4];
+	uint8_t sts;
+	uint8_t artifact;
+	uint8_t checksum;
+	uint8_t lf;
+} USART_TX_MSG;
+
 /* Exported constants --------------------------------------------------------*/
 
 /**
@@ -49,6 +58,7 @@
 										USART_STS + \
 										USART_CHECKSUM + \
 										USART_LF*/
+#define USART_QUEUE_LENGTH				25
 
 /* Definition for USARTx clock resources */
 #define USARTx                           USART2
@@ -92,19 +102,30 @@ void MX_USART2_UART_Init(void);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart);
+void fill_usart_tx(uint8_t *en_artifact, uint8_t *serial_tx, uint8_t val, uint16_t pos,
+		uint8_t *checksum);
+void calc_artifact(uint8_t *en_artifact, uint8_t *serial_tx, uint8_t val, uint16_t pos);
+void calc_chksm(uint8_t *serial_tx, uint8_t *checksum);
+void send_pdo_usart(void);
 
 /* Exported variables ------------------------------------------------------- */
 
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_tx;
 extern DMA_HandleTypeDef hdma_rx;
-extern uint8_t usart_tx[2*USART_MSG_LENGTH];
+extern USART_TX_MSG usart_tx;
 extern uint8_t usart_rx[USART_MSG_LENGTH];
 extern uint32_t usart_tx_msg_cnt;
 extern uint32_t usart_rx_msg_cnt;
 extern uint8_t usart_rx_chksum_err;
 extern uint8_t en_send_can;
+extern uint8_t en_usart_tx;
 extern uint16_t promise_sdo;
+extern uint16_t usart_tx_idx;
+extern uint8_t usart_tx_mutex;
+extern uint32_t send_usart_cnt_ms;
+extern uint32_t send_usart_tim_ms;
+extern uint8_t en_usart_tx_sdo;
 
 #endif /* __USART_H__ */
 
