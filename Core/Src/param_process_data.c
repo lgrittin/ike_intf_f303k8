@@ -252,7 +252,13 @@ struct DATA param_data[] =
     ID_SDO_22,
     PROTECTION,
     ID_SDO_22_BYTE,
-    &i_inv_oc
+    &i_inv_oc,
+
+    //en_sweep
+    ID_SDO_23,
+    IGBT_SETTINGS,
+    ID_SDO_23_BYTE,
+    &en_sweep
 };
 
 

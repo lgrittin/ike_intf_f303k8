@@ -73,7 +73,7 @@ int main(void)
 	/* Init CAN for G170 communication */
 	MX_CAN1_Init();
 
-	if (HAL_UART_Receive_IT(&huart2, (uint8_t*)usart_rx, USART_MSG_LENGTH)!= HAL_OK)
+	if (HAL_UART_Receive_DMA(&huart2, usart_rx.all, USART_MSG_LENGTH)!= HAL_OK)
 		Error_Handler();
 
 	while(1)
