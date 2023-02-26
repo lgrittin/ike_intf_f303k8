@@ -62,7 +62,7 @@ struct DATA {
  * SERVICE DEVICE OBJECT (SDO)
  * ========================================================= */
 
-#define SDO_LENGTH 24
+#define SDO_LENGTH 26
 
 #define ID_SDO_00 0x0200
 #define ID_SDO_01 0x0201
@@ -88,6 +88,8 @@ struct DATA {
 #define ID_SDO_21 0x0215
 #define ID_SDO_22 0x0216
 #define ID_SDO_23 0x0217
+#define ID_SDO_24 0x0218
+#define ID_SDO_25 0x0219
 
 #define ID_SDO_00_BYTE 2
 #define ID_SDO_01_BYTE 2
@@ -102,17 +104,19 @@ struct DATA {
 #define ID_SDO_10_BYTE 4
 #define ID_SDO_11_BYTE 4
 #define ID_SDO_12_BYTE 4
-#define ID_SDO_13_BYTE 4
+#define ID_SDO_13_BYTE 2
 #define ID_SDO_14_BYTE 4
-#define ID_SDO_15_BYTE 4
+#define ID_SDO_15_BYTE 2
 #define ID_SDO_16_BYTE 4
-#define ID_SDO_17_BYTE 4
+#define ID_SDO_17_BYTE 2
 #define ID_SDO_18_BYTE 4
-#define ID_SDO_19_BYTE 4
+#define ID_SDO_19_BYTE 2
 #define ID_SDO_20_BYTE 4
-#define ID_SDO_21_BYTE 4
+#define ID_SDO_21_BYTE 2
 #define ID_SDO_22_BYTE 4
 #define ID_SDO_23_BYTE 2
+#define ID_SDO_24_BYTE 4
+#define ID_SDO_25_BYTE 2
 
 typedef enum {
     CTRL_INPUT = 0,

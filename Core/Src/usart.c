@@ -34,6 +34,7 @@
 UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_tx;
 DMA_HandleTypeDef hdma_rx;
+USART_TX_MSG usart_tx_dbg;
 USART_TX_MSG usart_tx;
 USART_RX_MSG usart_rx;
 uint32_t usart_tx_msg_cnt = 0;
@@ -363,6 +364,13 @@ void send_pdo_usart(void)
 			((en_artifact == 0x0A) ? (0x01) : (en_artifact)), 7, &chksm);
 	fill_usart_tx(&en_artifact, &usart_tx.checksum, chksm, 8, &chksm);
 	usart_tx.lf = 0x0A;
+
+//	if (en_usart_tx_sdo)
+//	{
+//		usart_tx_dbg.data_id[0] = usart_tx.data_id[0];
+//		usart_tx_dbg.data_id[1] = usart_tx.data_id[1];
+//		memcpy(&usart_tx_dbg, &usart_tx, 10);
+//	}
 
 	/* Send Msg Tx */
 	if(HAL_UART_Transmit_DMA(&huart2, &usart_tx.data_id[0], USART_MSG_LENGTH)!= HAL_OK)

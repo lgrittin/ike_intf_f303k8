@@ -120,9 +120,9 @@ typedef struct {
     uint16_t v_inv_rect;
     uint16_t i_inv_rect;
     float v_inv_rect_gain;
-    float v_inv_rect_offset;
+    int16_t v_inv_rect_offset;
     float i_inv_rect_gain;
-    float i_inv_rect_offset;
+    int16_t i_inv_rect_offset;
     float v_inv_rect_f;
     float i_inv_rect_f;
 } ADC_CTRL_FDB_RECT;
@@ -131,11 +131,11 @@ typedef struct {
     uint16_t ntc2;
     uint16_t pot;
     float ntc1_gain;
-    float ntc1_offset;
+    int16_t ntc1_offset;
     float ntc2_gain;
-    float ntc2_offset;
+    int16_t ntc2_offset;
     float pot_gain;
-    float pot_offset;
+    int16_t pot_offset;
     float ntc1_f;
     float ntc2_f;
     float pot_f;
@@ -147,8 +147,8 @@ typedef struct {
 } ADC;
 #define ADC_DEFAULT { \
     0U, 0U, 0.0f, 0.0f, \
-    0U, 0U, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, \
-    0U, 0U, 0U, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f \
+    0U, 0U, 1.0f, 0, 1.0f, 0, 0.0f, 0.0f, \
+    0U, 0U, 0U, 1.0f, 0, 1.0f, 0, 1.0f, 0, 0.0f, 0.0f, 0.0f \
 }
 
 
@@ -161,7 +161,7 @@ typedef struct {
 /* ## EXTERNAL Vars ################################################### */
 
 EXTERN uint32_t main_fsm_loop_cnt       		DSPINIT(0U)
-EXTERN ADC adc                          		DSPINIT(ADC_DEFAULT)
+EXTERN ADC adc;                          		//DSPINIT(ADC_DEFAULT)
 EXTERN STS_WD1 sts_wd_1                 		DSPINIT({0U})
 EXTERN ALM_WD1 alm_wd_1                 		DSPINIT({0U})
 EXTERN CMD_WD1 cmd_wd_1                 		DSPINIT({0U})
@@ -179,6 +179,7 @@ EXTERN uint16_t scr_cmd_cmpa            		DSPINIT(20000U) // [epwmclk]
 EXTERN uint16_t scr_cmd_cmpb            		DSPINIT(13000U) // [epwmclk]
 EXTERN float scr_cmd_alfa_set           		DSPINIT(0.0f)   // [pu]
 EXTERN float scr_cmd_alfa               		DSPINIT(0.0f)   // [pu]
+EXTERN float scr_cmd_alfa_max           		DSPINIT(1.0f)   // [pu]
 EXTERN float scr_cmd_alfa_check_50hz    		DSPINIT(0.1f)   // [pu]
 EXTERN float scr_cmd_alfa_check_60hz    		DSPINIT(0.1f)   // [pu]
 EXTERN float scr_cmd_alfa_increment     		DSPINIT(0.001f) // [pu/ms]
@@ -195,6 +196,7 @@ EXTERN float sweep_amplitude            		DSPINIT(0.3f)   // [Hz]
 EXTERN float sweep_freq                 		DSPINIT(0.1f)   // [Hz]
 EXTERN uint16_t overcurr_ac_detect      		DSPINIT(0U)
 EXTERN float i_inv_oc                   		DSPINIT(2.0f)   // [A]
+EXTERN uint16_t en_prot_overcurr        		DSPINIT(0U)     // [#]
 
 #endif /* INC_GLOBALS_H_ */
 
