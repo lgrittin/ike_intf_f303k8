@@ -17,18 +17,11 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-<<<<<<< HEAD
-#include "main.h"
-#include "usart.h"
-#include "param_process_data.h"
-#include "globals.h"
-=======
 #include "can.h"
 #include "usart.h"
 #include "main.h"
 #include "globals.h"
 #include "param_process_data.h"
->>>>>>> feature/store_sdo
 
 /* Private typedef -----------------------------------------------------------*/
 
@@ -51,8 +44,6 @@ uint8_t usart_rx_read_param_cnt = 0;
 uint8_t usart_tx_read_param_cnt = 0;
 uint8_t en_send_can = 0;
 uint16_t promise_sdo = 0x0000;
-<<<<<<< HEAD
-=======
 uint8_t en_usart_tx_sdo = 0;
 uint16_t usart_tx_idx = 0;
 uint8_t usart_tx_mutex = 0;
@@ -60,7 +51,6 @@ uint8_t en_usart_tx = 0;
 uint32_t send_usart_cnt_ms = 0;
 uint32_t send_usart_tim_ms = 0;
 uint8_t rx[10] = {0,0,0,0,0,0,0,0,0,0};
->>>>>>> feature/store_sdo
 
 /* Private function prototypes -----------------------------------------------*/
 
