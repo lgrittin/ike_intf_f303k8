@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f3xx_hal.h"
 #include "stm32f3xx_nucleo_32.h"
+#include "param_process_data.h"
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -68,6 +69,15 @@
 #define SDO_RX_G170_MASK_FILT         (SDO_RX_SYS_MASK_FILT | SDO_BIT_AGGIUNTO)
 
 /* Exported variables ------------------------------------------------------- */
+
+extern CAN_HandleTypeDef hcan;
+extern CAN_TxHeaderTypeDef can_tx_header;
+extern CAN_RxHeaderTypeDef can_rx_header;
+extern uint8_t can_tx[CAN_DATA_LENGTH];
+extern uint8_t can_rx[CAN_DATA_LENGTH];
+extern uint32_t can_tx_mailbox;
+extern uint8_t usart_rx_chksum_err;
+extern uint16_t promise_sdo;
 
 /* Exported macro ------------------------------------------------------------*/
 

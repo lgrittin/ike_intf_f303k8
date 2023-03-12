@@ -23,8 +23,33 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f3xx_hal.h"
 #include "stm32f3xx_nucleo_32.h"
+#include "param_process_data.h"
 
 /* Exported types ------------------------------------------------------------*/
+
+struct CMDSTS_BIT {
+	uint8_t read_cmd : 1;			// bit0
+	uint8_t chksm_rx_err_sts : 7;	// bit1..bit7
+};
+
+typedef union CMDSTS {
+	uint8_t all;
+	struct CMDSTS_BIT bit;
+} CMDSTS;
+
+typedef struct {
+	uint8_t data_id[2];
+	uint8_t data_val[4];
+	CMDSTS cmd_sts;
+	uint8_t artifact;
+	uint8_t checksum;
+	uint8_t lf;
+} USART_TX_MSG;
+
+typedef union USART_RX_MSG {
+	uint8_t all[USART_MSG_LENGTH];
+	USART_TX_MSG byte;
+} USART_RX_MSG;
 
 /* Exported constants --------------------------------------------------------*/
 
@@ -70,8 +95,32 @@ void MX_USART2_UART_Init(void);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart);
+void fill_usart_tx(uint8_t *en_artifact, uint8_t *serial_tx, uint8_t val, uint16_t pos,
+		uint8_t *checksum);
+void calc_artifact(uint8_t *en_artifact, uint8_t *serial_tx, uint8_t val, uint16_t pos);
+void calc_chksm(uint8_t *serial_tx, uint8_t *checksum);
+void decode_usart_rx(uint8_t *serial_rx, uint8_t artifact_bitwise);
+void send_pdo_usart(void);
 
 /* Exported variables ------------------------------------------------------- */
+
+extern UART_HandleTypeDef huart2;
+extern DMA_HandleTypeDef hdma_tx;
+extern DMA_HandleTypeDef hdma_rx;
+extern USART_TX_MSG usart_tx;
+extern USART_RX_MSG usart_rx;
+extern uint32_t usart_tx_msg_cnt;
+extern uint32_t usart_rx_msg_cnt;
+extern uint8_t usart_rx_chksum_err;
+extern uint8_t en_send_can;
+extern uint8_t en_usart_tx;
+extern uint16_t promise_sdo;
+extern uint16_t usart_tx_idx;
+extern uint8_t usart_tx_mutex;
+extern uint32_t send_usart_cnt_ms;
+extern uint32_t send_usart_tim_ms;
+extern uint8_t en_usart_tx_sdo;
+extern uint8_t rx[10];
 
 #endif /* __USART_H__ */
 

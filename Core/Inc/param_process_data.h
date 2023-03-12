@@ -37,11 +37,32 @@ struct DATA {
     //void *lim_min;
 };
 
+/**
+ * USART Msg Structure:
+ *
+ * idx: [0]   [1]   [2]     [3]     [4]     [5]     [6]   [7]        [8]     [9]
+ *      ---------------------------------------------------------------------------
+ *      | ID1 | ID0 | DATA3 | DATA2 | DATA1 | DATA0 | STS | ARTIFACT | CHKSM | LF |
+ *      ---------------------------------------------------------------------------
+ */
+#define CAN_ADDRESS_LENGTH              2
+#define CAN_DATA_LENGTH                 4
+#define USART_ARTIFACT                  1
+#define USART_STS                       1
+#define USART_CHECKSUM                  1
+#define USART_LF                        1
+#define USART_MSG_LENGTH                10/*CAN_ADDRESS_LENGTH + \
+                                        CAN_DATA_LENGTH + \
+                                        USART_ARTIFACT + \
+                                        USART_STS + \
+                                        USART_CHECKSUM + \
+                                        USART_LF*/
+
 /* ========================================================= *
  * SERVICE DEVICE OBJECT (SDO)
  * ========================================================= */
 
-#define SDO_LENGTH 23
+#define SDO_LENGTH 26
 
 #define ID_SDO_00 0x0200
 #define ID_SDO_01 0x0201
@@ -66,30 +87,36 @@ struct DATA {
 #define ID_SDO_20 0x0214
 #define ID_SDO_21 0x0215
 #define ID_SDO_22 0x0216
+#define ID_SDO_23 0x0217
+#define ID_SDO_24 0x0218
+#define ID_SDO_25 0x0219
 
 #define ID_SDO_00_BYTE 2
 #define ID_SDO_01_BYTE 2
 #define ID_SDO_02_BYTE 2
 #define ID_SDO_03_BYTE 2
 #define ID_SDO_04_BYTE 4
-#define ID_SDO_05_BYTE 2
-#define ID_SDO_06_BYTE 2
+#define ID_SDO_05_BYTE 4
+#define ID_SDO_06_BYTE 4
 #define ID_SDO_07_BYTE 2
 #define ID_SDO_08_BYTE 4
 #define ID_SDO_09_BYTE 4
 #define ID_SDO_10_BYTE 4
 #define ID_SDO_11_BYTE 4
 #define ID_SDO_12_BYTE 4
-#define ID_SDO_13_BYTE 4
+#define ID_SDO_13_BYTE 2
 #define ID_SDO_14_BYTE 4
-#define ID_SDO_15_BYTE 4
+#define ID_SDO_15_BYTE 2
 #define ID_SDO_16_BYTE 4
-#define ID_SDO_17_BYTE 4
+#define ID_SDO_17_BYTE 2
 #define ID_SDO_18_BYTE 4
-#define ID_SDO_19_BYTE 4
+#define ID_SDO_19_BYTE 2
 #define ID_SDO_20_BYTE 4
-#define ID_SDO_21_BYTE 4
+#define ID_SDO_21_BYTE 2
 #define ID_SDO_22_BYTE 4
+#define ID_SDO_23_BYTE 2
+#define ID_SDO_24_BYTE 4
+#define ID_SDO_25_BYTE 2
 
 typedef enum {
     CTRL_INPUT = 0,
